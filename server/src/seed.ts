@@ -223,7 +223,7 @@ async function main() {
     },
     {
       empNo: 'EMP017',
-      organization: { connect: { id: 'O005' } },
+      organization: { connect: { id: 'O001' } },
       id: 'O001E017',
       name: 'Kaitlyn Parker',
       role: 'KITCHEN_STAFF',
@@ -249,7 +249,7 @@ async function main() {
     },
     {
       empNo: 'EMP019',
-      organization: { connect: { id: 'O006' } },
+      organization: { connect: { id: 'O001' } },
       id: 'O001E019',
       name: 'Michelle Martinez',
       role: 'KITCHEN_ADMIN',
@@ -593,28 +593,7 @@ async function main() {
       fingerprint_capacity: 3000,
       fingerprint_per_machine: 150,
     },
-    {
-      id: 'O005',
-      name: 'CloudFirst Technologies',
-      logoUrl: 'https://example.com/logos/cloudfirst.png',
-      contactEmail: 'team@cloudfirst.tech',
-      active: true,
-      createdAt: '2024-04-12T09:15:00.000Z',
-      updatedAt: '2024-12-12T13:20:00.000Z',
-      fingerprint_capacity: 1500,
-      fingerprint_per_machine: 75,
-    },
-    {
-      id: 'O006',
-      name: 'Innovation Labs',
-      logoUrl: null,
-      contactEmail: 'contact@innovationlabs.org',
-      active: true,
-      createdAt: '2024-05-08T16:30:00.000Z',
-      updatedAt: '2024-11-20T10:10:00.000Z',
-      fingerprint_capacity: 800,
-      fingerprint_per_machine: 40,
-    },
+ 
   ];
 
   // const ingredients: Prisma.IngredientCreateInput[] = [
