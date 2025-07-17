@@ -8,9 +8,7 @@ import Login from "../components/pages/Login/LoginPage/Login";
 // HR_ADMIN
 import EmployeePage from "../components/Pages/HR/EmployeePage/EmployeePage";
 import RegisterPage from "../components/Pages/HR/RegisterPage/RegisterPage";
-import PayrollPage from "../components/Pages/HR/PayrollPage/PayrollPage";
-import AdjustmentPage from "../components/Pages/HR/AdjustmentPage/AdjustmentPage";
-import PayslipPage from "../components/Pages/HR/PayslipPage/PayslipPage";
+
 
 // KITCHEN_ADMIN
 import KitchenAdmin from "../components/pages/KitchenAdmin/SchedulePage/KitchenAdmin";
@@ -128,30 +126,8 @@ const PrivateRoutes = () => (
         </ProtectedRoute>
       }
     />
-    <Route
-      path="/payroll"
-      element={
-        <ProtectedRoute allowedRoles={["HR_ADMIN","KITCHEN_ADMIN"]}>
-          <PayrollPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/adjustment"
-      element={
-        <ProtectedRoute allowedRoles={["HR_ADMIN","KITCHEN_ADMIN"]}>
-          <AdjustmentPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/payslip"
-      element={
-        <ProtectedRoute allowedRoles={["HR_ADMIN","KITCHEN_ADMIN"]}>
-          <PayslipPage />
-        </ProtectedRoute>
-      }
-    />
+
+
 
     {/* UserPortal Routes */}
     <Route

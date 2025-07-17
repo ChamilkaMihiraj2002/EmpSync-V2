@@ -164,7 +164,7 @@ export class SuperAdminService {
       });
 
       if (!lastOrg) {
-        throw new NotFoundException('No organizations found');
+        return 'O000'; 
       }
 
       return lastOrg.id;
