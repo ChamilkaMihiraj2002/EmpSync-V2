@@ -6,8 +6,8 @@ import {
     faChartLine,
     faHistory,
 } from "@fortawesome/free-solid-svg-icons";
-import NavBar from '../../../organisms/NavBar/NavBar';
-import Analysis from "../../../organisms/Inventory/Analysis/Analysis";
+import NavBar from '../../../organisms/NavBar/NavBar.jsx';
+import Analysis from "../../../organisms/Inventory/Analysis/Analysis.jsx";
 
 const AnalysisDashboard = () => {
     return (

@@ -10,15 +10,15 @@ import {
   message,
 } from "antd";
 import styles from "./EditModal.module.css";
-import Loading from "../../../atoms/loading/loading";
+import Loading from "../../../atoms/loading/loading.jsx";
 import dayjs from "dayjs";
 import { LuSave } from "react-icons/lu";
 import axios from "axios";
-import Gbutton from "../../../atoms/button/Button";
+import Gbutton from "../../../atoms/button/Button.jsx";
 import { RiFingerprintLine } from "react-icons/ri";
-import { usePopup } from "../../../../contexts/PopupContext";
-import { useAuth } from "../../../../contexts/AuthContext";
-import { useTheme } from "../../../../contexts/ThemeContext";
+import { usePopup } from "../../../../contexts/PopupContext.jsx";
+import { useAuth } from "../../../../contexts/AuthContext.jsx";
+import { useTheme } from "../../../../contexts/ThemeContext.jsx";
 
 const formItemLayout = {
   labelCol: {

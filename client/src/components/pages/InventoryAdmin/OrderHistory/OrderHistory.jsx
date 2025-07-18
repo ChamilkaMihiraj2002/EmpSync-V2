@@ -6,8 +6,8 @@ import {
     faChartLine,
     faHistory,
 } from "@fortawesome/free-solid-svg-icons";
-import NavBar from '../../../organisms/NavBar/NavBar';
-import Orders from '../../../organisms/Inventory/OrderHistory/Orders';
+import NavBar from '../../../organisms/NavBar/NavBar.jsx';
+import Orders from '../../../organisms/Inventory/OrderHistory/Orders.jsx';
 
 const OrderHistory = () => {
     return (

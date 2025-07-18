@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../../contexts/AuthContext";
-import Loading from "../../../atoms/loading/loading";
+import { useAuth } from "../../../../contexts/AuthContext.jsx";
+import Loading from "../../../atoms/loading/loading.jsx";
 
 const roleRouteMap = {
   HR_ADMIN: "/EmployeePage",

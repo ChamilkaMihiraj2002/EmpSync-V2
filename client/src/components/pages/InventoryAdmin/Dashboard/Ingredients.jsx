@@ -6,8 +6,8 @@ import {
     faChartLine,
     faHistory,
 } from "@fortawesome/free-solid-svg-icons";
-import NavBar from '../../../organisms/NavBar/NavBar';
-import InventoryManagement from '../../../organisms/Inventory/InventoryManagement/InventoryManagement';
+import NavBar from '../../../organisms/NavBar/NavBar.jsx';
+import InventoryManagement from '../../../organisms/Inventory/InventoryManagement/InventoryManagement.jsx';
 
 const Ingredients = () => {
     return (
