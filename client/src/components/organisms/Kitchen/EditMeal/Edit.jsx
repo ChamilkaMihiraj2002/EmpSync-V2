@@ -21,14 +21,14 @@ import {
 import styles from "./Edit.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { storage } from "../../../../firebase/config";
+import { storage } from "../../../../firebase/config,js";
 import {
   ref,
   uploadBytes,
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
-import { useAuth } from "../../../../contexts/AuthContext";
+import { useAuth } from "../../../../contexts/AuthContext.jsx";
 
 const { TextArea } = Input;
 const { Title } = Typography;

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Edit3, Calendar, User, Mail, Phone, MapPin, Weight, Ruler, IdCard, Briefcase, Fingerprint, UserPlus } from 'lucide-react';
 import axios from "axios";
 import moment from "moment";
-import { useAuth } from "../../../../contexts/AuthContext";
+import { useAuth } from "../../../../contexts/AuthContext.jsx";
 
 export default function UserProfile({ user }) {
   const [isEditing, setIsEditing] = useState(false);

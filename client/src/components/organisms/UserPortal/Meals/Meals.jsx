@@ -9,7 +9,7 @@ import {
   Tabs,
   Calendar,
 } from "antd";
-import { useAuth } from "../../../../contexts/AuthContext";
+import { useAuth } from "../../../../contexts/AuthContext.jsx";
 import axios from "axios";
 import styles from "./Meals.module.css";
 import { QrcodeOutlined } from "@ant-design/icons";
