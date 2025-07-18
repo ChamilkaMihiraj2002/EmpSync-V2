@@ -5,8 +5,8 @@ import SuperAdminProtectedRoute from "../../src/guards/SuperAdminProtectedRoute.
 import Login from "../components/pages/Login/LoginPage/Login.jsx";
 
 // HR_ADMIN
-import EmployeePage from "../components/Pages/HR/EmployeePage/EmployeePage.jsx";
-import RegisterPage from "../components/Pages/HR/RegisterPage/RegisterPage.jsx";
+import EmployeePage from "../components/pages/HR/EmployeePage/EmployeePage.jsx";
+import RegisterPage from "../components/pages/HR/RegisterPage/RegisterPage.jsx";
 
 
 // KITCHEN_ADMIN
@@ -17,18 +17,18 @@ import MealDetailsForm from "../components/pages/KitchenAdmin/AddMealPage/AddMea
 import EditMeal from "../components/pages/KitchenAdmin/EditMealPage/EditMeal.jsx";
 
 // ServingStaff
-import Serving from "../components/Pages/ServingStaff/BarcodeScan/Serving.jsx";
+import Serving from "../components/pages/ServingStaff/BarcodeScan/Serving.jsx";
 import MealConform from "../components/pages/ServingStaff/MealConfirm/MealConform.jsx";
 
 // KitchenStaff
-import KitchenStaff from "../components/Pages/kitchenStaff/kitchenStaff.jsx";
+import KitchenStaff from "../components/pages/kitchenStaff/kitchenStaff.jsx";
 
 // INVENTORY_ADMIN
 import LoginRouting from "../guards/LoginRouting";
 
 //UserAccout
-import ProfilePage from "../components/Pages/UserAccount/ProfilePage/ProfilePage.jsx";
-import UserMeals from "../components/Pages/UserAccount/MealsPage/MealsPage.jsx";
+import ProfilePage from "../components/pages/UserAccount/ProfilePage/ProfilePage.jsx";
+import UserMeals from "../components/pages/UserAccount/MealsPage/MealsPage.jsx";
 
 // SuperAdmin
 import SuperAdmin from "../components/pages/SuperAdmin/SuperAdmin.jsx";
