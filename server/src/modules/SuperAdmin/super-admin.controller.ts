@@ -23,7 +23,7 @@ export class SuperAdminController {
   // Organization endpoints
   
   @Post('organizations')
-  @UseGuards(AuthGuard('superadmin-jwt'))
+  // @UseGuards(AuthGuard('superadmin-jwt'))
   async createOrganization(@Body() data: Prisma.OrganizationCreateInput) {
     return this.superAdminService.createOrganization(data);
   }
@@ -91,7 +91,7 @@ export class SuperAdminController {
   }
 
   @Get('users/:id/permissions')
-  // @UseGuards(AuthGuard('superadmin-jwt'))
+  @UseGuards(AuthGuard('superadmin-jwt'))
   async getPermissionsByUserId(@Param('id') id: string) {
     return this.superAdminService.getPermissionsByUserId(id);
   }

@@ -280,19 +280,21 @@ const Report = () => {
 
       // Get meal types to map meal type IDs to names
       let mealTypesData = mealTypes;
-      if (!mealTypesData || mealTypesData.length === 0) {
-        const mealTypesResponse = await fetch(
-          "http://localhost:3000/meal-types",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
 
-        if (mealTypesResponse.ok) {
-          mealTypesData = await mealTypesResponse.json();
+      if (!mealTypesData || mealTypesData.length === 0) {
+        try {
+          const mealTypesResponse = await axios.get(`${urL}/meal-types`, {
+            params: {
+              orgId: authData?.orgId,
+            },
+            headers: {
+              Authorization: Bearer `${token}`,
+            },
+          });
+
+          mealTypesData = mealTypesResponse.data;
+        } catch (error) {
+          console.error("Error fetching meal types:", error);
         }
       }
 
