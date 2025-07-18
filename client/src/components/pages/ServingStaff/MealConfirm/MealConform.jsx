@@ -5,8 +5,8 @@ import styles from './MealConform.module.css';
 import DateTime from '../../../organisms/Serving/DateAndTime/DateTime';
 import Loading from '../../../atoms/loading/loading'; // Renamed to Loading
 import { useAuth } from "../../../../contexts/AuthContext";
+import axios from 'axios';
 
-const urL = import.meta.env.VITE_BASE_URL;
 const { Title, Text } = Typography;
 
 
@@ -18,31 +18,29 @@ const MealConform = () => {
   const [employeeName, setEmployeeName] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { authData } = useAuth();
+  const urL = import.meta.env.VITE_BASE_URL;
   const token = authData?.accessToken;
 
   useEffect(() => {
     const fetchDetails = async () => {
       setIsLoading(true);
       try {
-        const orderRes = await fetch(`${urL}/orders/${id}`);
-        if (!orderRes.ok) throw new Error('Failed to fetch order details');
-        const orderData = await orderRes.json();
+        const orderRes = await axios.get(`${urL}/orders/${id}`);
+        const orderData = orderRes.data;
         setOrderDetails(orderData);
 
         const [mealIdPart] = orderData.meals[0].split(':');
-        const mealRes = await fetch(`${urL}/meal/${mealIdPart}?orgId=${orderData.orgId}`);
-        if (!mealRes.ok) throw new Error('Failed to fetch meal details');
-        const mealData = await mealRes.json();
+        const mealRes = await axios.get(`${urL}/meal/${mealIdPart}?orgId=${orderData.orgId}`);
+        const mealData = mealRes.data;
         setMealDetails(mealData);
 
-        const nameRes = await fetch(`${urL}/user/${orderData.employeeId}/org/${orderData.orgId}/name`);
-        if (!nameRes.ok) throw new Error('Failed to fetch employee name');
-        const nameData = await nameRes.json();
+        const nameRes = await axios.get(`${urL}/user/${orderData.employeeId}/org/${orderData.orgId}/name`);
+        const nameData = nameRes.data;
         setEmployeeName(nameData.name);
       } catch (error) {
         notification.error({
           message: 'Error',
-          description: error.message,
+          description: error.response?.data?.message || error.message,
           duration: 3,
         });
       } finally {
@@ -64,15 +62,11 @@ const MealConform = () => {
 
   const handleConfirm = async () => {
     try {
-      const response = await fetch(`${urL}/orders/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ serve: true }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update order status');
+      await axios.patch(
+        `${urL}/orders/${id}`,
+        { serve: true },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
 
       notification.success({
         message: 'Order Confirmed',
@@ -86,7 +80,7 @@ const MealConform = () => {
     } catch (error) {
       notification.error({
         message: 'Error',
-        description: 'Failed to confirm order',
+        description: error.response?.data?.message || 'Failed to confirm order',
         duration: 3,
       });
     }

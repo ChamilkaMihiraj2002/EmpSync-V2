@@ -18,19 +18,11 @@ import MealDetailsForm from "../components/pages/KitchenAdmin/AddMealPage/AddMea
 import EditMeal from "../components/pages/KitchenAdmin/EditMealPage/EditMeal";
 
 // ServingStaff
-import Serving from "../components/Pages/ServingStaff/BarcodeScan/Serving";
+import Serving from "../components/pages/ServingStaff/BarcodeScan/Serving";
 import MealConform from "../components/pages/ServingStaff/MealConfirm/MealConform";
 
 // KitchenStaff
 import KitchenStaff from "../components/Pages/kitchenStaff/kitchenStaff";
-
-// INVENTORY_ADMIN
-import Ingredients from "../components/Pages/InventoryAdmin/Dashboard/Ingredients";
-import AnalysisDashboard from "../components/Pages/InventoryAdmin/AnalysisDashboard/AnalysisDashboard";
-import OrderReportDashboard from "../components/Pages/InventoryAdmin/OrderReportDashboard/OrderReportDashboard";
-import OrderHistory from "../components/Pages/InventoryAdmin/OrderHistory/OrderHistory";
-import CostAnalysis from "../components/organisms/Inventory/Analysis/Cost Analysis/CostAnalysis";
-import LoginRouting from "../guards/LoginRouting";
 
 //UserAccout
 import ProfilePage from "../components/Pages/UserAccount/ProfilePage/ProfilePage";
@@ -42,6 +34,8 @@ import SuperAdminLogin from '../components/pages/Login/SuperAdmin/LoginPage/Logi
 import Organizations from '../components/organisms/SuperAdmin/pages/Organizations/Organization List/OrganizationList';
 import Roles from '../components/organisms/SuperAdmin/pages/Roles/RolesList';
 import Permissions from '../components/organisms/SuperAdmin/pages/Permissions/PermissionsList';
+
+import LoginRouting from "../guards/LoginRouting";
 
 const PrivateRoutes = () => (
   <>
@@ -216,48 +210,6 @@ const PrivateRoutes = () => (
         <ProtectedRoute allowedRoles={["KITCHEN_STAFF"]}>
           <KitchenStaff />
         </ProtectedRoute>
-      }
-    />
-
-    {/* INVENTORY_ADMIN Routes */}
-    <Route
-      path="/Ingredients"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <Ingredients />
-        // </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/CostAnalysis"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <CostAnalysis />
-        // </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/AnalysisDashboard"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <AnalysisDashboard />
-        // </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/OrderReportDashboard"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <OrderReportDashboard />
-        // </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/OrderHistory"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <OrderHistory />
-        // </ProtectedRoute>
       }
     />
 

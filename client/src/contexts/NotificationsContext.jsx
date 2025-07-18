@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 
+const urL = import.meta.env.VITE_BASE_URL;
+
 // Utility function to format time ago
 const formatTimeAgo = (timestamp) => {
   const now = new Date();
@@ -9,6 +11,7 @@ const formatTimeAgo = (timestamp) => {
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
+  
 
   if (seconds < 30) return "Just now";
   if (seconds < 60) return `${seconds} seconds ago`;
@@ -91,7 +94,7 @@ export const NotificationsProvider = ({ children }) => {
   // Check schedules
   const checkSchedules = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/schedule");
+      const response = await axios.get(`${urL}/schedule`);
       const schedules = response.data;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
