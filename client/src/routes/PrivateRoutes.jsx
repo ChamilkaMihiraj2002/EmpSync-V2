@@ -21,7 +21,7 @@ import Serving from "../components/pages/ServingStaff/BarcodeScan/Serving.jsx";
 import MealConform from "../components/pages/ServingStaff/MealConfirm/MealConform.jsx";
 
 // KitchenStaff
-import KitchenStaff from "../components/pages/kitchenStaff/kitchenStaff.jsx";
+import KitchenStaff from "../components/pages/KitchenStaff/kitchenStaff.jsx";
 
 // INVENTORY_ADMIN
 import LoginRouting from "../guards/LoginRouting";
