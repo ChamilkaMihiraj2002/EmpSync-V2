@@ -42,6 +42,7 @@ const Report = () => {
   const { authData } = useAuth();
   const [orderDetailsData, setOrderDetailsData] = useState([]);
   const token = authData?.accessToken;
+
   const [highestDemandMeal, setHighestDemandMeal] = useState(null);
   const [lowestDemandMeal, setLowestDemandMeal] = useState(null);
 
@@ -282,7 +283,7 @@ const Report = () => {
       let mealTypesData = mealTypes;
       if (!mealTypesData || mealTypesData.length === 0) {
         const mealTypesResponse = await fetch(
-          "http://localhost:3000/meal-types",
+          "${urL}/user/meal-types",
           {
             method: "GET",
             headers: {

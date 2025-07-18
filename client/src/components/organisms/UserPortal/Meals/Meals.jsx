@@ -17,6 +17,7 @@ import Barcode from "react-barcode";
 
 const { Text, Title } = Typography;
 const { TabPane } = Tabs;
+const urL = import.meta.env.VITE_BASE_URL;
 
 const Cart = ({
   order,
@@ -172,7 +173,7 @@ const Meals = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/orders?employeeId=${employeeId}`,
+          `${urL}/user/orders?employeeId=${employeeId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -195,7 +196,7 @@ const Meals = () => {
         const mealResponses = await Promise.all(
           uniqueMealIds.map((mealId) =>
             axios
-              .get(`http://localhost:3000/meal/${mealId}`)
+              .get(`${urL}/user/meal/${mealId}`)
               .then((response) => response.data)
               .catch(() => null)
           )
@@ -239,7 +240,7 @@ const Meals = () => {
 
   const handleCancelOrder = async (orderId) => {
     try {
-      await axios.delete(`http://localhost:3000/orders/${orderId}`, {
+      await axios.delete(`${urL}/user/orders/${orderId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

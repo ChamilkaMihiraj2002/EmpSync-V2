@@ -192,11 +192,17 @@ const Dashbord = () => {
   const [activeTab, setActiveTab] = useState("breakfast");
   const [manualOverride, setManualOverride] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [mealData, setMealData] = useState({ breakfast: [], lunch: [], dinner: [] }); // State to store meal data
+  const [mealData, setMealData] = useState({
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+  }); // State to store meal data
   const [showPopup, setShowPopup] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [isViewingTomorrow, setIsViewingTomorrow] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const urL = import.meta.env.VITE_BASE_URL;
+
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
@@ -267,9 +273,9 @@ const Dashbord = () => {
     const fetchMealData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/meals-serving/meal-counts-by-time?date=${selectedDate
-            .toISOString()
-            .split("T")[0]}`
+          `${urL}/user/meals-serving/meal-counts-by-time?date=${
+            selectedDate.toISOString().split("T")[0]
+          }`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch meal data");
@@ -328,11 +334,16 @@ const Dashbord = () => {
 
     return (
       <div style={cartStyles.popupOverlay} onClick={closePopup}>
-        <div style={cartStyles.popupContent} onClick={(e) => e.stopPropagation()}>
+        <div
+          style={cartStyles.popupContent}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div style={cartStyles.popupHeader}>
             <div>
               <h2 style={cartStyles.popupTitle}>{selectedMeal.name}</h2>
-              <p style={cartStyles.popupMealId}>Meal ID: {selectedMeal.mealId}</p>
+              <p style={cartStyles.popupMealId}>
+                Meal ID: {selectedMeal.mealId}
+              </p>
             </div>
             <button style={cartStyles.closeButton} onClick={closePopup}>
               ×
@@ -341,15 +352,21 @@ const Dashbord = () => {
           <div style={cartStyles.popupBody}>
             <div style={cartStyles.countRow}>
               <span style={cartStyles.countLabel}>Total Order Count:</span>
-              <span style={cartStyles.countValue}>{selectedMeal.orderCount}</span>
+              <span style={cartStyles.countValue}>
+                {selectedMeal.orderCount}
+              </span>
             </div>
             <div style={cartStyles.countRow}>
               <span style={cartStyles.countLabel}>Served Order Count:</span>
-              <span style={cartStyles.countValue}>{selectedMeal.serveOrderCount}</span>
+              <span style={cartStyles.countValue}>
+                {selectedMeal.serveOrderCount}
+              </span>
             </div>
             <div style={cartStyles.countRow}>
               <span style={cartStyles.countLabel}>Pending Order Count:</span>
-              <span style={cartStyles.countValue}>{selectedMeal.pendingOrderCount}</span>
+              <span style={cartStyles.countValue}>
+                {selectedMeal.pendingOrderCount}
+              </span>
             </div>
           </div>
         </div>
@@ -387,7 +404,7 @@ const Dashbord = () => {
             </Card>
           ))}
         </div>
-        
+
         {/* Cart section under each meal tab */}
         <div style={cartStyles.cartContainer}>
           {/* <h3 style={{ margin: '20px 0', fontSize: '20px', fontWeight: '600', color: '#333' }}>
@@ -395,9 +412,9 @@ const Dashbord = () => {
           </h3> */}
           <div style={cartStyles.cartGrid}>
             {cartItems.map((item) => (
-              <div 
-                key={item.id} 
-                style={{...cartStyles.cartCard, cursor: 'pointer'}} 
+              <div
+                key={item.id}
+                style={{ ...cartStyles.cartCard, cursor: "pointer" }}
                 onClick={() => handleCartItemClick(item)}
               >
                 <div style={cartStyles.imageContainer}>
@@ -455,10 +472,7 @@ const Dashbord = () => {
           </h2>
           <p className={styles.time}>{formattedTime}</p>
           <div className={styles.dateControls}>
-            <button 
-              className={styles.dateButton}
-              onClick={handleDateToggle}
-            >
+            <button className={styles.dateButton} onClick={handleDateToggle}>
               {isViewingTomorrow ? "Today" : "Tomorrow"}
             </button>
             <button
@@ -499,11 +513,9 @@ const Dashbord = () => {
           </div>
         </div>
 
-        <div className={styles.content}>
-          {renderTabContent()}
-        </div>
+        <div className={styles.content}>{renderTabContent()}</div>
       </div>
-      
+
       {/* Popup */}
       {renderPopup()}
     </div>

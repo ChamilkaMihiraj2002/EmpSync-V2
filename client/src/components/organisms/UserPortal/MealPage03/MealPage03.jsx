@@ -1,6 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button, Card, Tabs, Badge, Row, Col, Typography, Layout, Alert, Space, Modal } from "antd";
-import { CheckCircleOutlined, CloseOutlined, LoadingOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import {
+  Button,
+  Card,
+  Tabs,
+  Badge,
+  Row,
+  Col,
+  Typography,
+  Layout,
+  Alert,
+  Space,
+  Modal,
+} from "antd";
+import {
+  CheckCircleOutlined,
+  CloseOutlined,
+  LoadingOutlined,
+  ShoppingCartOutlined,
+} from "@ant-design/icons";
 import { IoClose } from "react-icons/io5";
 import { MdLanguage } from "react-icons/md";
 import { RiAiGenerate } from "react-icons/ri";
@@ -18,13 +35,11 @@ const { Title, Text } = Typography;
 const Loading = ({ text }) => (
   <div className={styles.loadingContainer}>
     <Spin
-      indicator={<LoadingOutlined style={{ fontSize: 75, color: "#06C167" }} spin />}
+      indicator={
+        <LoadingOutlined style={{ fontSize: 75, color: "#06C167" }} spin />
+      }
     />
-    {text && (
-      <div className={styles.loadingText}>
-        {text}
-      </div>
-    )}
+    {text && <div className={styles.loadingText}>{text}</div>}
   </div>
 );
 
@@ -41,6 +56,7 @@ const MealPage03 = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [meals, setMeals] = useState([]);
+  const urL = import.meta.env.VITE_BASE_URL;
   const [mealTime, setMealTime] = useState([[], []]);
   const [allMeals, setAllMeals] = useState([]);
   const [_, setRenderTrigger] = useState(0);
@@ -75,7 +91,7 @@ const MealPage03 = () => {
 
     const fetchMealTime = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/meal-types/fetch`);
+        const res = await axios.get(`${urL}/user/meal-types/fetch`);
         const mealTimes = Array.isArray(res.data) ? res.data : [[], []];
         setMealTime(mealTimes);
         const availableMealTimes =
@@ -123,7 +139,7 @@ const MealPage03 = () => {
         });
 
         const scheduleResponse = await axios.get(
-          `http://localhost:3000/schedule/${formattedDate}`
+          `${urL}/user/schedule/${formattedDate}`
         );
         const scheduleData = Array.isArray(scheduleResponse.data)
           ? scheduleResponse.data
@@ -286,7 +302,7 @@ const MealPage03 = () => {
           JSON.stringify(orderData, null, 2)
         );
         const response = await axios.post(
-          "http://localhost:3000/orders",
+          "${urL}/user/orders",
           orderData
         );
 
@@ -351,7 +367,9 @@ const MealPage03 = () => {
               className={styles.cartButton}
               onClick={() => setIsCartVisible(true)}
             >
-              <Badge count={orderItems.reduce((sum, item) => sum + item.count, 0)}>
+              <Badge
+                count={orderItems.reduce((sum, item) => sum + item.count, 0)}
+              >
                 Cart
               </Badge>
             </Button>
@@ -417,7 +435,9 @@ const MealPage03 = () => {
                     type="default"
                     onClick={() => setSelectedDate("tomorrow")}
                     className={`${styles.dateButton} ${
-                      selectedDate === "tomorrow" ? styles.selectedDateButton : ""
+                      selectedDate === "tomorrow"
+                        ? styles.selectedDateButton
+                        : ""
                     }`}
                   >
                     {text.tomorrow} (
@@ -464,7 +484,9 @@ const MealPage03 = () => {
                         <div className={styles.mealList}>
                           {loading ? (
                             <div className={styles.loadingWrapper}>
-                              <Loading text={text.loading || "Loading meals..."} />
+                              <Loading
+                                text={text.loading || "Loading meals..."}
+                              />
                             </div>
                           ) : (
                             <Row gutter={[8, 8]}>
@@ -487,7 +509,9 @@ const MealPage03 = () => {
                                             meal[
                                               `name${language
                                                 .charAt(0)
-                                                .toUpperCase()}${language.slice(1)}`
+                                                .toUpperCase()}${language.slice(
+                                                1
+                                              )}`
                                             ] || "Meal"
                                           }
                                           src={
@@ -519,14 +543,20 @@ const MealPage03 = () => {
                                               {meal[
                                                 `name${language
                                                   .charAt(0)
-                                                  .toUpperCase()}${language.slice(1)}`
+                                                  .toUpperCase()}${language.slice(
+                                                  1
+                                                )}`
                                               ] || "Unnamed Meal"}
                                             </Text>
-                                            <div className={styles.descriptionText}>
+                                            <div
+                                              className={styles.descriptionText}
+                                            >
                                               {meal.description ||
                                                 "No description available"}
                                             </div>
-                                            <div className={styles.priceContainer}>
+                                            <div
+                                              className={styles.priceContainer}
+                                            >
                                               <Text
                                                 strong
                                                 className={styles.priceText}
@@ -573,134 +603,147 @@ const MealPage03 = () => {
                       showIcon
                     />
                   ) : (
-  <div>
-                    <Row gutter={[16, 16]}>
-                      {Object.entries(
-                        orderItems.reduce((acc, item) => {
-                          const key = `${item.mealId}-${item.date}-${item.mealTime}`;
-                          if (!acc[key]) acc[key] = { ...item, count: 0 };
-                          acc[key].count += item.count;
-                          return acc;
-                        }, {})
-                      ).map(([key, item], index) => {
-                        const meal = allMeals.find(
-                          (meal) => meal.id === item.mealId
-                        );
-                        return (
-                          <Col span={24} key={index}>
-                            <div className={styles.orderCard}>
-                              <Row justify="space-between" align="middle">
-                                <Col xs={14} sm={16}>
-                                  <Text strong className={styles.orderCardTitle}>
-                                    {meal
-                                      ? meal[
-                                          `name${language
-                                            .charAt(0)
-                                            .toUpperCase()}${language.slice(1)}`
-                                        ] || "Unnamed Meal"
-                                      : "Meal not found"}
-                                  </Text>
-                                  <div className={styles.orderCardDetails}>
-                                    <Badge
-                                      status="processing"
-                                      text={
-                                        item.date === "today"
-                                          ? text.today
-                                          : text.tomorrow
-                                      }
-                                    />
-                                    <Badge
-                                      status="success"
-                                      text={
-                                        availableMealTimes.find(
-                                          (m) => m.id === item.mealTime
-                                        )?.name || "Unknown Meal Time"
-                                      }
-                                    />
-                                  </div>
-                                </Col>
-                                <Col xs={10} sm={8} className={styles.rightAligned}>
-                                  <div className={styles.counter}>
-                                    <Button
-                                      type="text"
-                                      onClick={() =>
-                                        updateOrderItemCount(
-                                          meal?.id,
-                                          item.date,
-                                          item.mealTime,
-                                          false
-                                        )
-                                      }
-                                      className={styles.actionButton}
+                    <div>
+                      <Row gutter={[16, 16]}>
+                        {Object.entries(
+                          orderItems.reduce((acc, item) => {
+                            const key = `${item.mealId}-${item.date}-${item.mealTime}`;
+                            if (!acc[key]) acc[key] = { ...item, count: 0 };
+                            acc[key].count += item.count;
+                            return acc;
+                          }, {})
+                        ).map(([key, item], index) => {
+                          const meal = allMeals.find(
+                            (meal) => meal.id === item.mealId
+                          );
+                          return (
+                            <Col span={24} key={index}>
+                              <div className={styles.orderCard}>
+                                <Row justify="space-between" align="middle">
+                                  <Col xs={14} sm={16}>
+                                    <Text
+                                      strong
+                                      className={styles.orderCardTitle}
                                     >
-                                      -
-                                    </Button>
-                                    <Text className={styles.itemCountBadge}>
-                                      {item.count}
-                                    </Text>
-                                    <Button
-                                      type="text"
-                                      onClick={() =>
-                                        updateOrderItemCount(
-                                          meal?.id,
-                                          item.date,
-                                          item.mealTime,
-                                          true
-                                        )
-                                      }
-                                      className={styles.actionButton}
-                                    >
-                                      +
-                                    </Button>
-                                  </div>
-                                  <div className={styles.priceDiv}>
-                                    <Text strong>
-                                      Rs.{" "}
                                       {meal
-                                        ? (meal.price * item.count).toFixed(2)
-                                        : "0.00"}
+                                        ? meal[
+                                            `name${language
+                                              .charAt(0)
+                                              .toUpperCase()}${language.slice(
+                                              1
+                                            )}`
+                                          ] || "Unnamed Meal"
+                                        : "Meal not found"}
                                     </Text>
-                                  </div>
-                                  <Button
-                                    className={styles.removeButton}
-                                    type="text"
-                                    icon={<IoClose size={20} color="red" />}
-                                    onClick={() => toggleOrderItem(item.mealId)}
-                                  />
-                                </Col>
-                              </Row>
-                            </div>
-                          </Col>
-                        );
-                      })}
-                    </Row>
-                    <div className={styles.totalContainer}>
-                      <Text strong className={styles.totalText}>
-                        Total: Rs.{" "}
-                        {orderItems
-                          .reduce((total, item) => {
-                            const meal = allMeals.find(
-                              (meal) => meal.id === item.mealId
-                            );
-                            return total + (meal ? meal.price * item.count : 0);
-                          }, 0)
-                          .toFixed(2)}
-                      </Text>
-                    </div>
-                    <Button
-                      type="primary"
-                      block
-                      size="large"
-                      onClick={placeOrder}
-                      disabled={orderItems.length === 0}
-                      className={`${styles.placeOrderButton} ${
-                        orderItems.length === 0
-                          ? styles.disabledButton
-                          : styles.enabledButton
-                      }`}
-                    >
-                      {text.placeOrder}
-                    </Button>
+                                    <div className={styles.orderCardDetails}>
+                                      <Badge
+                                        status="processing"
+                                        text={
+                                          item.date === "today"
+                                            ? text.today
+                                            : text.tomorrow
+                                        }
+                                      />
+                                      <Badge
+                                        status="success"
+                                        text={
+                                          availableMealTimes.find(
+                                            (m) => m.id === item.mealTime
+                                          )?.name || "Unknown Meal Time"
+                                        }
+                                      />
+                                    </div>
+                                  </Col>
+                                  <Col
+                                    xs={10}
+                                    sm={8}
+                                    className={styles.rightAligned}
+                                  >
+                                    <div className={styles.counter}>
+                                      <Button
+                                        type="text"
+                                        onClick={() =>
+                                          updateOrderItemCount(
+                                            meal?.id,
+                                            item.date,
+                                            item.mealTime,
+                                            false
+                                          )
+                                        }
+                                        className={styles.actionButton}
+                                      >
+                                        -
+                                      </Button>
+                                      <Text className={styles.itemCountBadge}>
+                                        {item.count}
+                                      </Text>
+                                      <Button
+                                        type="text"
+                                        onClick={() =>
+                                          updateOrderItemCount(
+                                            meal?.id,
+                                            item.date,
+                                            item.mealTime,
+                                            true
+                                          )
+                                        }
+                                        className={styles.actionButton}
+                                      >
+                                        +
+                                      </Button>
+                                    </div>
+                                    <div className={styles.priceDiv}>
+                                      <Text strong>
+                                        Rs.{" "}
+                                        {meal
+                                          ? (meal.price * item.count).toFixed(2)
+                                          : "0.00"}
+                                      </Text>
+                                    </div>
+                                    <Button
+                                      className={styles.removeButton}
+                                      type="text"
+                                      icon={<IoClose size={20} color="red" />}
+                                      onClick={() =>
+                                        toggleOrderItem(item.mealId)
+                                      }
+                                    />
+                                  </Col>
+                                </Row>
+                              </div>
+                            </Col>
+                          );
+                        })}
+                      </Row>
+                      <div className={styles.totalContainer}>
+                        <Text strong className={styles.totalText}>
+                          Total: Rs.{" "}
+                          {orderItems
+                            .reduce((total, item) => {
+                              const meal = allMeals.find(
+                                (meal) => meal.id === item.mealId
+                              );
+                              return (
+                                total + (meal ? meal.price * item.count : 0)
+                              );
+                            }, 0)
+                            .toFixed(2)}
+                        </Text>
+                      </div>
+                      <Button
+                        type="primary"
+                        block
+                        size="large"
+                        onClick={placeOrder}
+                        disabled={orderItems.length === 0}
+                        className={`${styles.placeOrderButton} ${
+                          orderItems.length === 0
+                            ? styles.disabledButton
+                            : styles.enabledButton
+                        }`}
+                      >
+                        {text.placeOrder}
+                      </Button>
                     </div>
                   )}
                 </Card>

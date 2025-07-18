@@ -6,6 +6,7 @@ const formatTimeAgo = (timestamp) => {
   const now = new Date();
   const date = new Date(timestamp);
   const seconds = Math.floor((now - date) / 1000);
+  const urL = import.meta.env.VITE_BASE_URL;
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
@@ -91,7 +92,7 @@ export const NotificationsProvider = ({ children }) => {
   // Check schedules
   const checkSchedules = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/schedule");
+      const response = await axios.get("${urL}/user/schedule");
       const schedules = response.data;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
