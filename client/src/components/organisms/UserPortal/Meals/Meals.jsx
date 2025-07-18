@@ -14,6 +14,8 @@ import axios from "axios";
 import styles from "./Meals.module.css";
 import { QrcodeOutlined } from "@ant-design/icons";
 import Barcode from "react-barcode";
+  const urL = import.meta.env.VITE_BASE_URL;
+
 
 const { Text, Title } = Typography;
 const { TabPane } = Tabs;
@@ -172,7 +174,7 @@ const Meals = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/orders?employeeId=${employeeId}`,
+          `${urL}/orders?employeeId=${employeeId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -195,7 +197,7 @@ const Meals = () => {
         const mealResponses = await Promise.all(
           uniqueMealIds.map((mealId) =>
             axios
-              .get(`http://localhost:3000/meal/${mealId}`)
+              .get(`${urL}/meal/${mealId}`)
               .then((response) => response.data)
               .catch(() => null)
           )
@@ -239,7 +241,7 @@ const Meals = () => {
 
   const handleCancelOrder = async (orderId) => {
     try {
-      await axios.delete(`http://localhost:3000/orders/${orderId}`, {
+      await axios.delete(`${urL}/orders/${orderId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

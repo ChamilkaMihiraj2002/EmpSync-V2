@@ -24,11 +24,6 @@ import MealConform from "../components/pages/ServingStaff/MealConfirm/MealConfor
 import KitchenStaff from "../components/Pages/kitchenStaff/kitchenStaff.jsx";
 
 // INVENTORY_ADMIN
-import Ingredients from "../components/Pages/InventoryAdmin/Dashboard/Ingredients.jsx";
-import AnalysisDashboard from "../components/Pages/InventoryAdmin/AnalysisDashboard/AnalysisDashboard.jsx";
-import OrderReportDashboard from "../components/Pages/InventoryAdmin/OrderReportDashboard/OrderReportDashboard.jsx";
-import OrderHistory from "../components/Pages/InventoryAdmin/OrderHistory/OrderHistory.jsx";
-import CostAnalysis from "../components/organisms/Inventory/Analysis/Cost Analysis/CostAnalysis.jsx";
 import LoginRouting from "../guards/LoginRouting";
 
 //UserAccout
@@ -52,21 +47,7 @@ const PrivateRoutes = () => (
         </LoginRouting>
       }
     />
-    <Route
-      path="/LoginRole"
-      element={
-        <ProtectedRoute
-          allowedRoles={[
-            "HR_ADMIN",
-            "INVENTORY_ADMIN",
-            "KITCHEN_ADMIN",
-            "KITCHEN_STAFF",
-          ]}
-        >
-          <LoginRole />
-        </ProtectedRoute>
-      }
-    />
+
 
     {/* SuperAdmin Routes */}
     <Route

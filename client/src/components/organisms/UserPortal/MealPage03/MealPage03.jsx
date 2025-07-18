@@ -46,6 +46,8 @@ const MealPage03 = () => {
   const [_, setRenderTrigger] = useState(0);
   const [isCartVisible, setIsCartVisible] = useState(false);
   const language = "english";
+    const urL = import.meta.env.VITE_BASE_URL;
+
   const text = translations[language];
   const carouselRef = useRef(null);
   const [resetPin, setResetPin] = useState(false);
@@ -75,7 +77,7 @@ const MealPage03 = () => {
 
     const fetchMealTime = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/meal-types/fetch`);
+        const res = await axios.get(`${urL}/meal-types/fetch`);
         const mealTimes = Array.isArray(res.data) ? res.data : [[], []];
         setMealTime(mealTimes);
         const availableMealTimes =
@@ -123,7 +125,7 @@ const MealPage03 = () => {
         });
 
         const scheduleResponse = await axios.get(
-          `http://localhost:3000/schedule/${formattedDate}`
+          `${urL}/schedule/${formattedDate}`
         );
         const scheduleData = Array.isArray(scheduleResponse.data)
           ? scheduleResponse.data
@@ -286,7 +288,7 @@ const MealPage03 = () => {
           JSON.stringify(orderData, null, 2)
         );
         const response = await axios.post(
-          "http://localhost:3000/orders",
+          `${urL}/orders`,
           orderData
         );
 

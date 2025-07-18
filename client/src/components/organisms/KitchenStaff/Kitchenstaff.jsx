@@ -197,6 +197,8 @@ const Dashbord = () => {
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [isViewingTomorrow, setIsViewingTomorrow] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+    const urL = import.meta.env.VITE_BASE_URL;
+
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
@@ -267,7 +269,7 @@ const Dashbord = () => {
     const fetchMealData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/meals-serving/meal-counts-by-time?date=${selectedDate
+          `${urL}/meals-serving/meal-counts-by-time?date=${selectedDate
             .toISOString()
             .split("T")[0]}`
         );

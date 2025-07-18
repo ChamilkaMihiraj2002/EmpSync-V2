@@ -21,7 +21,7 @@ import {
 import styles from "./Edit.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { storage } from "../../../../firebase/config,js";
+import { storage } from "../../../../firebase/config.js";
 import {
   ref,
   uploadBytes,

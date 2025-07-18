@@ -22,6 +22,8 @@ const SuperAdmin = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+    const urL = import.meta.env.VITE_BASE_URL;
+
   const { superAuthData } = useAuth();
 
   const [rolesData] = useState([
@@ -61,7 +63,7 @@ const SuperAdmin = () => {
     }
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:3000/super-admin/organizations', {
+      const res = await axios.get(`${urL}/super-admin/organizations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setData(mapOrganizations(res.data));
@@ -94,7 +96,7 @@ const SuperAdmin = () => {
   const handleOk = async (values) => {
     if (!token) return;
     try {
-      await axios.post('http://localhost:3000/super-admin/organizations', values, {
+      await axios.post(`${urL}/super-admin/organizations`, values, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -117,7 +119,7 @@ const SuperAdmin = () => {
   const updateOrganization = async (orgId, values) => {
     if (!token) return;
     try {
-      await axios.put(`http://localhost:3000/super-admin/organizations/${orgId}`, values, {
+      await axios.put(`${urL}/super-admin/organizations/${orgId}`, values, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -151,7 +153,7 @@ const SuperAdmin = () => {
       async onOk() {
         if (!token) return;
         try {
-          await axios.delete(`http://localhost:3000/super-admin/organizations/${item.key}`, {
+          await axios.delete(`${urL}/super-admin/organizations/${item.key}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           await fetchOrganizations();

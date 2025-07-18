@@ -28,6 +28,8 @@ const Page2 = ({
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [fingerprintConnected, setFingerprintConnected] = useState(false);
   const [fingerprintUnitName, setFingerprintUnitName] = useState("");
+    const urL = import.meta.env.VITE_BASE_URL;
+
   const [serialReader, setSerialReader] = useState(null);
   const [serialReadingActive, setSerialReadingActive] = useState(false);
   const [showFingerprintPopup, setShowFingerprintPopup] = useState(false);
@@ -218,7 +220,7 @@ const Page2 = ({
 
           // Check which thumbIds are not in the database
           try {
-            const response = await fetch('http://localhost:3000/user-finger-print-register-backend/all-fingerprints');
+            const response = await fetch('${urL}/user-finger-print-register-backend/all-fingerprints');
             if (response.ok) {
               const dbFingerprints = await response.json();
               const dbThumbIds = dbFingerprints.map(fp => fp.thumbid);
@@ -261,7 +263,7 @@ const Page2 = ({
   // Fetch employee ID by thumbid (fingerprint ID) and set username for Page3
   const fetchUserByFingerprintId = async (fingerId) => {
     try {
-      const response = await fetch(`http://localhost:3000/user-finger-print-register-backend/fingerprint?thumbid=${fingerId}`);
+      const response = await fetch(`${urL}/user-finger-print-register-backend/fingerprint?thumbid=${fingerId}`);
       if (!response.ok) {
         throw new Error("Fingerprint not found");
       }
@@ -270,7 +272,7 @@ const Page2 = ({
       if (!empId) {
         throw new Error("No employee ID found for this fingerprint");
       }
-      const userResponse = await fetch(`http://localhost:3000/user/${empId}`);
+      const userResponse = await fetch(`${urL}/user/${empId}`);
       if (!userResponse.ok) {
         throw new Error("User not found for this employee ID");
       }
@@ -295,7 +297,7 @@ const Page2 = ({
     if (pin.length === 4) {
       setScanning(true);
       try {
-        const response = await fetch(`http://localhost:3000/user/${pin}`);
+        const response = await fetch(`${urL}/user/${pin}`);
         if (!response.ok) {
           throw new Error("User not found");
         }
