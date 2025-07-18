@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MealService } from './meal.service';
-import { DatabaseService } from '../../database/database.service';
+import { MealService } from './meal.service.ts';
+import { DatabaseService } from '../../database/database.service.ts';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('MealService', () => {

@@ -11,11 +11,11 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { UserService } from './user.service.ts';
 import { Prisma } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../authentication/roles.guard';
-import { Roles } from '../authentication/roles.decorator';
+import { RolesGuard } from '../authentication/roles.guard.ts';
+import { Roles } from '../authentication/roles.decorator.ts';
 
 @Controller('user')
 export class UserController {

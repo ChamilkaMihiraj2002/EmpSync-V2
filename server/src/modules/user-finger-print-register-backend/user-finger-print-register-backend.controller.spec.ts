@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserFingerPrintRegisterBackendController } from './user-finger-print-register-backend.controller';
+import { UserFingerPrintRegisterBackendController } from './user-finger-print-register-backend.controller.ts';
 
 describe('UserFingerPrintRegisterBackendController', () => {
   let controller: UserFingerPrintRegisterBackendController;

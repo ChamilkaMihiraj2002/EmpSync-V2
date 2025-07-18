@@ -1,9 +1,9 @@
 import { Prisma } from '@prisma/client';
-import { UserService } from './core/user/user.service';
-import { DatabaseService } from './database/database.service';
-import { MealService } from './modules/meal/meal.service';
-import { IngredientsService } from './modules/ingredient/ingredient.service';
-import { SuperAdminService } from './modules/SuperAdmin/super-admin.service';
+import { UserService } from './core/user/user.service.ts';
+import { DatabaseService } from './database/database.service.ts';
+import { MealService } from './modules/meal/meal.service.ts';
+import { IngredientsService } from './modules/ingredient/ingredient.service.ts';
+import { SuperAdminService } from './modules/SuperAdmin/super-admin.service.ts';
 
 const databaseService = new DatabaseService();
 const userService = new UserService(databaseService);

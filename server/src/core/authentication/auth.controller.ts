@@ -6,10 +6,10 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth.service.ts';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from './roles.guard';
-import { Roles } from './roles.decorator';
+import { RolesGuard } from './roles.guard.ts';
+import { Roles } from './roles.decorator.ts';
 
 @Controller('auth')
 // Declares this class as a controller with the base route 'auth'.

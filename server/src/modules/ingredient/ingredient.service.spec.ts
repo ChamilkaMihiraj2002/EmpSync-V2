@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { IngredientsService } from './ingredient.service';
-import { DatabaseService } from '../../database/database.service';
+import { IngredientsService } from './ingredient.service.ts';
+import { DatabaseService } from '../../database/database.service.ts';
 
 describe('IngredientsService', () => {
   let service: IngredientsService;

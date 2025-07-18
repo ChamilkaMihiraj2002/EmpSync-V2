@@ -11,11 +11,11 @@ import {
   HttpStatus,
   Query
 } from '@nestjs/common';
-import { OrdersService } from './order.service';
+import { OrdersService } from './order.service.ts';
 import { Prisma } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../../core/authentication/roles.guard';
-import { Roles } from '../../core/authentication/roles.decorator';
+import { RolesGuard } from '../../core/authentication/roles.guard.ts';
+import { Roles } from '../../core/authentication/roles.decorator.ts';
 
 // Controller for handling order-related HTTP requests
 @Controller('orders')

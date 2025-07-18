@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { MealTypeService } from './meal-type.service';
-import { MealTypeController } from './meal-type.controller';
-import { ScheduleModule } from '../schedule/schedule.module';
+import { MealTypeService } from './meal-type.service.ts';
+import { MealTypeController } from './meal-type.controller.ts';
+import { ScheduleModule } from '../schedule/schedule.module.ts';
 
 @Module({
   imports: [ScheduleModule],

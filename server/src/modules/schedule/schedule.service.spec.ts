@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ScheduleService } from './schedule.service';
-import { DatabaseService } from '../../database/database.service';
+import { ScheduleService } from './schedule.service.ts';
+import { DatabaseService } from '../../database/database.service.ts';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('ScheduleService', () => {

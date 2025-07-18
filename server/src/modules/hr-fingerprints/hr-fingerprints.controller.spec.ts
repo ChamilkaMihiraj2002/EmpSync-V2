@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HrFingerprintsController } from './hr-fingerprints.controller';
+import { HrFingerprintsController } from './hr-fingerprints.controller.ts';
 
 describe('HrFingerprintsController', () => {
   let controller: HrFingerprintsController;

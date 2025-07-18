@@ -3,7 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { DatabaseService } from '../../database/database.service';
+import { DatabaseService } from '../../database/database.service.ts';
 
 @Injectable()
 export class ScheduledMealService {

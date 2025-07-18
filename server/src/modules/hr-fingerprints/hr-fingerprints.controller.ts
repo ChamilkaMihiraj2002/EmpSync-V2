@@ -1,5 +1,5 @@
 import { Controller, Delete, Get, Param,Query } from '@nestjs/common';
-import { HrFingerprintsService } from './hr-fingerprints.service';
+import { HrFingerprintsService } from './hr-fingerprints.service.ts';
 
 @Controller('hr-fingerprints')
 export class HrFingerprintsController {

@@ -13,7 +13,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { SuperAdminService } from './super-admin.service';
+import { SuperAdminService } from './super-admin.service.ts';
 import { AuthGuard } from '@nestjs/passport';
 
 

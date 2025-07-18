@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ScheduledMealService } from './schedule.service';
-import { ScheduledMealController } from './schedule.controller';
-import { ScheduleCleanupService } from './schedule-cleanup.service';
+import { ScheduledMealService } from './schedule.service.ts';
+import { ScheduledMealController } from './schedule.controller.ts';
+import { ScheduleCleanupService } from './schedule-cleanup.service.ts';
 
 
 

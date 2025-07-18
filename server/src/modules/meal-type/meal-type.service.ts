@@ -3,8 +3,8 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { DatabaseService } from '../../database/database.service';
-import { ScheduledMealService } from '../schedule/schedule.service';
+import { DatabaseService } from '../../database/database.service.ts';
+import { ScheduledMealService } from '../schedule/schedule.service.ts';
 import {
   startOfDay,
   endOfDay,

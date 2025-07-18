@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus, Query } from '@nestjs/common';
-import { IngredientsService } from './ingredient.service';
+import { IngredientsService } from './ingredient.service.ts';
 import { Prisma } from '@prisma/client';
 
 @Controller('ingredients')

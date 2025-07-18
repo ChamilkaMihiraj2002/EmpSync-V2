@@ -1,5 +1,5 @@
 import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
-import { MealsServingService } from './meals-serving.service';
+import { MealsServingService } from './meals-serving.service.ts';
 
 @Controller('meals-serving')
 export class MealsServingController {

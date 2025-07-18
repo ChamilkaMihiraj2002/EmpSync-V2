@@ -11,10 +11,10 @@ import {
   BadRequestException,
   Query,
 } from '@nestjs/common';
-import { MealTypeService } from './meal-type.service';
+import { MealTypeService } from './meal-type.service.ts';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../../core/authentication/roles.guard';
-import { Roles } from '../../core/authentication/roles.decorator';
+import { RolesGuard } from '../../core/authentication/roles.guard.ts';
+import { Roles } from '../../core/authentication/roles.decorator.ts';
 
 @Controller('meal-types')
 export class MealTypeController {

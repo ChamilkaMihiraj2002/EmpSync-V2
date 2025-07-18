@@ -5,7 +5,7 @@ import {
   HttpException,
   HttpStatus
 } from '@nestjs/common';
-import { DatabaseService } from '../../database/database.service';
+import { DatabaseService } from '../../database/database.service.ts';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
 dotenv.config();

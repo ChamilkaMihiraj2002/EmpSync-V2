@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MealController } from './meal.controller';
-import { MealService } from './meal.service';
+import { MealController } from './meal.controller.ts';
+import { MealService } from './meal.service.ts';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('MealController', () => {

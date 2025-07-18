@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OrdersService } from './order.service';
-import { DatabaseService } from '../../database/database.service';
+import { OrdersService } from './order.service.ts';
+import { DatabaseService } from '../../database/database.service.ts';
 import { HttpException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 

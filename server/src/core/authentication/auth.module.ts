@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { JwtStrategy } from './jwt.strategy';
+import { AuthService } from './auth.service.ts';
+import { AuthController } from './auth.controller.ts';
+import { JwtStrategy } from './jwt.strategy.ts';
 import { passportJwtSecret } from 'jwks-rsa';
-import { UserModule } from '../user/user.module'; // <-- Add this line
+import { UserModule } from '../user/user.module.ts'; // <-- Add this line
 
 
 @Module({

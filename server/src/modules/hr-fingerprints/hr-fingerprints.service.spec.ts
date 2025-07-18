@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HrFingerprintsService } from './hr-fingerprints.service';
+import { HrFingerprintsService } from './hr-fingerprints.service.ts';
 
 describe('HrFingerprintsService', () => {
   let service: HrFingerprintsService;

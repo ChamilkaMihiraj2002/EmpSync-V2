@@ -1,5 +1,5 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { DatabaseService } from '../../database/database.service';
+import { DatabaseService } from '../../database/database.service.ts';
 import { Prisma } from '@prisma/client';
 
 @Injectable()

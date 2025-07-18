@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserFingerPrintRegisterBackendService } from './user-finger-print-register-backend.service';
+import { UserFingerPrintRegisterBackendService } from './user-finger-print-register-backend.service.ts';
 
 describe('UserFingerPrintRegisterBackendService', () => {
   let service: UserFingerPrintRegisterBackendService;

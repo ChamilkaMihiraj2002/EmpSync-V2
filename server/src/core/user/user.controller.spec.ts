@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
+import { UserController } from './user.controller.ts';
+import { UserService } from './user.service.ts';
 import { Prisma } from '@prisma/client';
 import { HttpException, HttpStatus } from '@nestjs/common';
 

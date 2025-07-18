@@ -11,11 +11,11 @@ import {
   HttpStatus,
   Query, // <-- Add this import
 } from '@nestjs/common';
-import { MealService } from './meal.service';
+import { MealService } from './meal.service.ts';
 import { Prisma } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../../core/authentication/roles.guard';
-import { Roles } from '../../core/authentication/roles.decorator';
+import { RolesGuard } from '../../core/authentication/roles.guard.ts';
+import { Roles } from '../../core/authentication/roles.decorator.ts';
 
 // Custom DTO for meal creation that includes ingredients
 interface CreateMealWithIngredientsDto

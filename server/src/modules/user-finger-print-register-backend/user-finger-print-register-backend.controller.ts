@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Query, BadRequestException } from '@nestjs/common';
-import { UserFingerPrintRegisterBackendService } from './user-finger-print-register-backend.service';
+import { UserFingerPrintRegisterBackendService } from './user-finger-print-register-backend.service.ts';
 
 @Controller('user-finger-print-register-backend')
 export class UserFingerPrintRegisterBackendController {

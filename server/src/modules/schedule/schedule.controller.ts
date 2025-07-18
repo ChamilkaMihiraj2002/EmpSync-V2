@@ -13,10 +13,10 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { ScheduledMealService } from './schedule.service';
+import { ScheduledMealService } from './schedule.service.ts';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../../core/authentication/roles.guard';
-import { Roles } from '../../core/authentication/roles.decorator';
+import { RolesGuard } from '../../core/authentication/roles.guard.ts';
+import { Roles } from '../../core/authentication/roles.decorator.ts';
 
 @Controller('schedule')
 export class ScheduledMealController {

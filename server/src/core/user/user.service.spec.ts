@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from './user.service';
-import { DatabaseService } from '../../database/database.service';
+import { UserService } from './user.service.ts';
+import { DatabaseService } from '../../database/database.service.ts';
 import { HttpException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
@@ -15,8 +15,6 @@ describe('UserService', () => {
     telephone: '1234567890',
     address: '123 Main St, NY',
     email: 'alice@example.com',
-    password: 'hashedpassword1',
-    thumbId: Buffer.from('b3f8a1d2', 'hex'),
   };
   const mockDatabaseService = {
     user: {

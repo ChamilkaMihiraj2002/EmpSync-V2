@@ -1,5 +1,5 @@
 import { Controller, Get,Post,Body, Param, UseGuards,HttpException,HttpStatus, Request } from '@nestjs/common';
-import { SuperAdminAuthService } from './superadmin-auth.service';
+import { SuperAdminAuthService } from './superadmin-auth.service.ts';
 
 @Controller('superadmin')
 export class SuperAdminAuthController {

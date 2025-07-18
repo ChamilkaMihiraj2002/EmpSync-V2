@@ -1,22 +1,22 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { DatabaseModule } from './database/database.module';
-import { UserModule } from './core/user/user.module';
-import { MealModule } from './modules/meal/meal.module';
-import { IngredientsModule } from './modules/ingredient/ingredient.module';
-import { OrdersModule } from './modules/order/order.module';
-import { ScheduleModule } from './modules/schedule/schedule.module';
-import { AuthModule } from './core/authentication/auth.module';
+import { AppController } from './app.controller.ts';
+import { AppService } from './app.service.ts';
+import { DatabaseModule } from './database/database.module.ts';
+import { UserModule } from './core/user/user.module.ts';
+import { MealModule } from './modules/meal/meal.module.ts';
+import { IngredientsModule } from './modules/ingredient/ingredient.module.ts';
+import { OrdersModule } from './modules/order/order.module.ts';
+import { ScheduleModule } from './modules/schedule/schedule.module.ts';
+import { AuthModule } from './core/authentication/auth.module.ts';
 import { ScheduleModule as NestScheduleModule } from '@nestjs/schedule';
-import { MealsServingModule } from './modules/meals-serving/meals-serving.module';
-import { MealTypeModule } from './modules/meal-type/meal-type.module';
-import { SuperAdminModule } from './modules/SuperAdmin/super-admin.module';
-import { SuperAdminAuthModule } from './core/super-admin-auth/superadmin-auth.module';
-import { UserFingerPrintRegisterBackendModule } from './modules/user-finger-print-register-backend/user-finger-print-register-backend.module';
-import { UserFingerPrintRegisterBackendService } from './modules/user-finger-print-register-backend/user-finger-print-register-backend.service';
-import { UserFingerPrintRegisterBackendController } from './modules/user-finger-print-register-backend/user-finger-print-register-backend.controller';
-import { HrFingerprintsModule } from './modules/hr-fingerprints/hr-fingerprints.module';
+import { MealsServingModule } from './modules/meals-serving/meals-serving.module.ts';
+import { MealTypeModule } from './modules/meal-type/meal-type.module.ts';
+import { SuperAdminModule } from './modules/SuperAdmin/super-admin.module.ts';
+import { SuperAdminAuthModule } from './core/super-admin-auth/superadmin-auth.module.ts';
+import { UserFingerPrintRegisterBackendModule } from './modules/user-finger-print-register-backend/user-finger-print-register-backend.module.ts';
+import { UserFingerPrintRegisterBackendService } from './modules/user-finger-print-register-backend/user-finger-print-register-backend.service.ts';
+import { UserFingerPrintRegisterBackendController } from './modules/user-finger-print-register-backend/user-finger-print-register-backend.controller.ts';
+import { HrFingerprintsModule } from './modules/hr-fingerprints/hr-fingerprints.module.ts';
 
 @Module({
   imports: [
