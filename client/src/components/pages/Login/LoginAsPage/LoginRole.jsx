@@ -5,7 +5,6 @@ import Loading from "../../../atoms/loading/loading";
 
 const roleRouteMap = {
   HR_ADMIN: "/EmployeePage",
-  INVENTORY_ADMIN: "/Ingredients",
   KITCHEN_STAFF: "/KitchenStaff",
   KITCHEN_ADMIN: "/kitchen-admin",
   SUPER_ADMIN: "/superadmin/dashboard",
