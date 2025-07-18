@@ -19,7 +19,7 @@ import { MdLanguage } from "react-icons/md";
 import { RiAiGenerate } from "react-icons/ri";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
-import translations from "../../../../utils/translations";
+import translations from "../../../../utils/translations.jsx";
 import axios from "axios";
 
 const { Content } = Layout;

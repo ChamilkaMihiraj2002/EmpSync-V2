@@ -2,18 +2,16 @@ import React, { useState } from "react";
 import { DatePicker, Form, Space, Input, Select, InputNumber } from "antd";
 import styles from "./Register.module.css";
 import { IoIosArrowBack } from "react-icons/io";
-
 // import FingerPrint from "../../../Atoms/FingerPrint/FingerPrint";
-
-import Loading from "../../../atoms/loading/loading";
+import Loading from "../../../atoms/loading/loading.jsx";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { AiOutlineCaretRight } from "react-icons/ai";
-import Gbutton from "../../../atoms/button/Button";
-import { useAuth } from "../../../../contexts/AuthContext";
+import Gbutton from "../../../atoms/button/Button.jsx";
+import { useAuth } from "../../../../contexts/AuthContext.jsx";
 
 import axios from "axios";
-import { usePopup } from "../../../../contexts/PopupContext";
+import { usePopup } from "../../../../contexts/PopupContext.jsx";
 
 const { Option } = Select;
 

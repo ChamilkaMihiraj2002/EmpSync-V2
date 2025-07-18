@@ -2,10 +2,9 @@ import { Button, Card, Typography, Space, Divider, notification } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import styles from './MealConform.module.css';
-import DateTime from '../../../organisms/Serving/DateAndTime/DateTime';
-import Loading from '../../../atoms/loading/loading'; // Renamed to Loading
-import { useAuth } from "../../../../contexts/AuthContext";
-import axios from 'axios';
+import DateTime from '../../../organisms/Serving/DateAndTime/DateTime.jsx';
+import Loading from '../../../atoms/loading/loading.jsx'; // Renamed to Loading
+import { useAuth } from "../../../../contexts/AuthContext.jsx";
 
 const { Title, Text } = Typography;
 
