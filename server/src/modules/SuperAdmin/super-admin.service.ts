@@ -275,6 +275,37 @@ export class SuperAdminService {
     }
   }
 
+  async getLastAdminEmployeeNo(): Promise<string> {
+    try {
+      const admins = await this.databaseService.user.findMany({
+        where: {
+          role: {
+            in: ['HR_ADMIN', 'KITCHEN_ADMIN'],
+          },
+          empNo: {
+            startsWith: 'A',
+          },
+        },
+        orderBy: {
+          empNo: 'desc',
+        },
+        take: 1,
+      });
+
+      if (admins.length === 0) {
+        return 'A000';
+      }
+
+      const lastEmpNo = admins[0].empNo; // e.g., 'A007'
+      const lastNumber = parseInt(lastEmpNo.slice(1), 10);
+      const nextNumber = (lastNumber + 1).toString().padStart(3, '0');
+      return `A${nextNumber}`;
+    } catch (error) {
+      throw new BadRequestException('Failed to fetch last admin employee number: ' + error.message);
+    }
+  }
+
+
   // Permission CRUD operations
   async createPermission(data: Prisma.PermissionCreateInput) {
     try {
