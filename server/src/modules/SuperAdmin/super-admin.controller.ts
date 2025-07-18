@@ -114,7 +114,7 @@ export class SuperAdminController {
     }
   }
 
-  @Get('users/last-employee-no')
+  @Get('admin/last-employee-no')
   async getLastAdminEmployeeNo() {
     return this.superAdminService.getLastAdminEmployeeNo();
   }

@@ -180,13 +180,26 @@ export class SuperAdminService {
       if (!data.email) {
         throw new BadRequestException('Email is required');
       }
+
+      // Only auto-generate employeeNo for admin roles
+      if (
+        data.role === 'HR_ADMIN' ||
+        data.role === 'KITCHEN_ADMIN'
+      ) {
+        const lastEmpNo = await this.getLastAdminEmployeeNo(); // e.g., 'A007'
+
+        const lastNumber = parseInt(lastEmpNo.slice(1), 10);
+        const nextNumber = (lastNumber + 1).toString().padStart(3, '0');
+        data.empNo = `A${nextNumber}`;
+      }
+
       return await this.databaseService.user.create({ data });
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
       }
       if (error.code === 'P2002') {
-        throw new BadRequestException('User with this email already exists');
+        throw new BadRequestException('User with this email or employee number already exists');
       }
       if (error.code === 'P2003') {
         throw new BadRequestException('Invalid organization ID provided');
