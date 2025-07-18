@@ -114,6 +114,12 @@ export class SuperAdminController {
     }
   }
 
+  @Get('users/last-employee-no')
+  async getLastAdminEmployeeNo() {
+    return this.superAdminService.getLastAdminEmployeeNo();
+  }
+
+
   @Put('users/:id')
   @UseGuards(AuthGuard('superadmin-jwt'))
   async updateUser(
@@ -128,6 +134,8 @@ export class SuperAdminController {
   async deleteUser(@Param('id') id: string) {
     return this.superAdminService.deleteUser(id);
   }
+
+
 
   // Permission endpoints
   @Post('permissions')
