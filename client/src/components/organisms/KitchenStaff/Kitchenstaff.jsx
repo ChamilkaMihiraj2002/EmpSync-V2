@@ -3,7 +3,7 @@ import { Calendar, Plus, Trash2 } from "lucide-react";
 import { DatePicker, Card } from "antd";
 import { useNavigate } from "react-router-dom";
 import "antd/dist/reset.css";
-import styles from "./Kitchenstaff.module.css";
+import styles from "./KitchenStaff.module.css";
 
 const { Meta } = Card;
 
@@ -75,6 +75,7 @@ const cartStyles = {
   countLabel: {
     fontSize: "12px",
     color: "#6c757d",
+    fontWeight: "500",
     textAlign: "center",
     marginTop: "2px",
   },
@@ -176,11 +177,7 @@ const cartStyles = {
     borderRadius: "8px",
     border: "1px solid #e9ecef",
   },
-  countLabel: {
-    fontSize: "16px",
-    fontWeight: "500",
-    color: "#333",
-  },
+
   countValue: {
     fontSize: "20px",
     fontWeight: "700",
