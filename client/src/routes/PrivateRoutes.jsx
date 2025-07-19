@@ -32,6 +32,7 @@ import UserMeals from "../components/pages/UserAccount/MealsPage/MealsPage.jsx";
 
 // SuperAdmin
 import SuperAdmin from "../components/pages/SuperAdmin/SuperAdmin.jsx";
+import LoginRole from "../components/pages/Login/LoginAsPage/LoginRole.jsx";
 import SuperAdminLogin from '../components/pages/Login/SuperAdmin/LoginPage/Login.jsx';
 import Organizations from '../components/organisms/SuperAdmin/pages/Organizations/Organization List/OrganizationList.jsx';
 import Roles from '../components/organisms/SuperAdmin/pages/Roles/RolesList.jsx';
@@ -45,6 +46,21 @@ const PrivateRoutes = () => (
         <LoginRouting>
           <Login />
         </LoginRouting>
+      }
+    />
+        <Route
+      path="/LoginRole"
+      element={
+        <ProtectedRoute
+          allowedRoles={[
+            "HR_ADMIN",
+            "INVENTORY_ADMIN",
+            "KITCHEN_ADMIN",
+            "KITCHEN_STAFF",
+          ]}
+        >
+          <LoginRole />
+        </ProtectedRoute>
       }
     />
 

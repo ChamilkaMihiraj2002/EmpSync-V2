@@ -10,7 +10,7 @@ const roleRouteMap = {
   SUPER_ADMIN: "/superadmin/dashboard",
 };
 
-const LoginPage = () => {
+const LoginRole = () => {
   const navigate = useNavigate();
   const { authData, authLoading } = useAuth();
 
@@ -26,4 +26,4 @@ const LoginPage = () => {
   return null; // No UI needed
 };
 
-export default LoginPage;
+export default LoginRole;
