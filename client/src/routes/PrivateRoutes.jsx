@@ -9,7 +9,6 @@ import Login from "../components/pages/Login/LoginPage/Login.jsx";
 import EmployeePage from "../components/pages/HR/EmployeePage/EmployeePage.jsx";
 import RegisterPage from "../components/pages/HR/RegisterPage/RegisterPage.jsx";
 
-// User Portal
 
 // KITCHEN_ADMIN
 import KitchenAdmin from "../components/pages/KitchenAdmin/SchedulePage/KitchenAdmin.jsx";
@@ -25,12 +24,8 @@ import MealConform from "../components/pages/ServingStaff/MealConfirm/MealConfor
 // KitchenStaff
 import KitchenStaff from "../components/pages/KitchenStaff/kitchenStaff.jsx";
 
-// INVENTORY_ADMIN
 import LoginRouting from "../guards/LoginRouting.jsx";
 
-//UserAccout
-import ProfilePage from "../components/pages/UserAccount/ProfilePage/ProfilePage.jsx";
-import UserMeals from "../components/pages/UserAccount/MealsPage/MealsPage.jsx";
 
 // SuperAdmin
 import SuperAdmin from "../components/pages/SuperAdmin/SuperAdmin.jsx";
@@ -55,7 +50,6 @@ const PrivateRoutes = () => (
         <ProtectedRoute
           allowedRoles={[
             "HR_ADMIN",
-            "INVENTORY_ADMIN",
             "KITCHEN_ADMIN",
             "KITCHEN_STAFF",
           ]}
@@ -123,24 +117,8 @@ const PrivateRoutes = () => (
       }
     />
 
-    {/* UserPortal Routes */}
-    <Route
-      path="/ProfilePage"
-      element={
-        <ProtectedRoute allowedRoles={["*"]}>
-          <ProfilePage />
-        </ProtectedRoute>
-      }
-    />
 
-    <Route
-      path="/UserMeals"
-      element={
-        <ProtectedRoute allowedRoles={["*"]}>
-          <UserMeals />
-        </ProtectedRoute>
-      }
-    />
+
 
     
 
@@ -210,17 +188,6 @@ const PrivateRoutes = () => (
       element={
         <ProtectedRoute allowedRoles={["KITCHEN_STAFF"]}>
           <KitchenStaff />
-        </ProtectedRoute>
-      }
-    />
-
-    {/* User account */}
-
-    <Route
-      path="/UserMeals"
-      element={
-        <ProtectedRoute allowedRoles={["*"]}>
-          <UserMeals />
         </ProtectedRoute>
       }
     />

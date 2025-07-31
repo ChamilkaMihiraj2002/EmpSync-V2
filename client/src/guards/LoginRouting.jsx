@@ -19,9 +19,7 @@ const LoginRouting = ({ children }) => {
 
       if (redirectRoles.includes(userRole)) {
         navigate("/loginrole");
-      } else {
-        navigate("/ProfilePage");
-      }
+      } 
     }
   }, [authData, authLoading, navigate]);
 
