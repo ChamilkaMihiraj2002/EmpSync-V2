@@ -7,7 +7,6 @@ import { MealModule } from './modules/meal/meal.module';
 import { OrdersModule } from './modules/order/order.module';
 import { ScheduleModule } from './modules/schedule/schedule.module';
 import { AuthModule } from './core/authentication/auth.module';
-import { ScheduleModule as NestScheduleModule } from '@nestjs/schedule';
 import { MealsServingModule } from './modules/meals-serving/meals-serving.module';
 import { MealTypeModule } from './modules/meal-type/meal-type.module';
 import { SuperAdminModule } from './modules/SuperAdmin/super-admin.module';
@@ -19,7 +18,6 @@ import { HrFingerprintsModule } from './modules/hr-fingerprints/hr-fingerprints.
 
 @Module({
   imports: [
-    NestScheduleModule.forRoot(),
     DatabaseModule,
     UserModule,
     MealModule,
