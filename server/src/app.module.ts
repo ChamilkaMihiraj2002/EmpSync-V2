@@ -4,11 +4,6 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { UserModule } from './core/user/user.module';
 import { MealModule } from './modules/meal/meal.module';
-<<<<<<< Updated upstream
-import { IngredientsModule } from './modules/ingredient/ingredient.module';
-=======
-import { PayrollModule } from './modules/payroll/payroll.module';
->>>>>>> Stashed changes
 import { OrdersModule } from './modules/order/order.module';
 import { ScheduleModule } from './modules/schedule/schedule.module';
 import { AuthModule } from './core/authentication/auth.module';
