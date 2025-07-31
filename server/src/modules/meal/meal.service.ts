@@ -13,7 +13,6 @@ export class MealService {
   
   async createWithIngredients(
     mealData: Omit<Prisma.MealCreateInput, 'ingredients'>,
-    ingredients: Array<{ ingredientId: number }>,
     orgId?: string,
   ) {
     try {
@@ -21,24 +20,8 @@ export class MealService {
         ...mealData,
         orgId: orgId || undefined,
       };
-      if (ingredients && ingredients.length > 0) {
-        data.ingredients = {
-          create: ingredients.map((ing) => ({
-            ingredient: {
-              connect: { id: ing.ingredientId },
-            },
-          })),
-        };
-      }
       const result = await this.databaseService.meal.create({
         data,
-        include: {
-          ingredients: {
-            include: {
-              ingredient: true,
-            },
-          },
-        },
       });
       return result;
     } catch (error) {
@@ -54,13 +37,6 @@ export class MealService {
           id,
           orgId: orgId || undefined,
         },
-        include: {
-          ingredients: {
-            include: {
-              ingredient: true,
-            },
-          },
-        },
       });
     } catch (error) {
       throw new BadRequestException('Failed to retrieve meal');
@@ -74,13 +50,6 @@ export class MealService {
       where: {
         orgId: orgId || undefined,
         ...(includeDeleted ? {} : { isDeleted: false }),
-      },
-      include: {
-        ingredients: {
-          include: {
-            ingredient: true,
-          },
-        },
       },
     });
   } catch (error) {
@@ -109,31 +78,9 @@ export class MealService {
 
   try {
     return await this.databaseService.$transaction(async (prisma) => {
-      if (ingredients && ingredients.length > 0) {
-        await prisma.mealIngredient.deleteMany({
-          where: { mealId: id },
-        });
-
-        for (const ing of ingredients) {
-          await prisma.mealIngredient.create({
-            data: {
-              mealId: id,
-              ingredientId: ing.ingredientId,
-            },
-          });
-        }
-      }
-
       const updatedMeal = await prisma.meal.update({
         where: { id },
         data: mealData,
-        include: {
-          ingredients: {
-            include: {
-              ingredient: true,
-            },
-          },
-        },
       });
 
       return updatedMeal;
