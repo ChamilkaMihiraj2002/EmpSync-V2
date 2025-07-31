@@ -9,7 +9,7 @@ import { DatabaseService } from '../../database/database.service';
 export class ScheduledMealService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  // Create a scheduled meal with meal connections
+  
   async create(
     date: string,
     mealTypeId: number,
@@ -37,7 +37,7 @@ export class ScheduledMealService {
         );
       }
 
-      // Create scheduled meal with meal connections
+      // Create scheduled meal 
       return this.databaseService.scheduledMeal.create({
         data: {
           date: scheduledDate,
@@ -59,7 +59,7 @@ export class ScheduledMealService {
     }
   }
 
-  // Find all scheduled meals, optionally filtered by orgId
+  // Find all scheduled meals
   async findAll(orgId?: string) {
     try {
       return this.databaseService.scheduledMeal.findMany({
