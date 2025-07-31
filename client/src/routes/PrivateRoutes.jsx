@@ -30,10 +30,6 @@ import MealConform from "../components/pages/ServingStaff/MealConfirm/MealConfor
 import KitchenStaff from "../components/pages/KitchenStaff/kitchenStaff.jsx";
 
 // INVENTORY_ADMIN
-import AnalysisDashboard from "../components/Pages/InventoryAdmin/AnalysisDashboard/AnalysisDashboard.jsx";
-import OrderReportDashboard from "../components/Pages/InventoryAdmin/OrderReportDashboard/OrderReportDashboard.jsx";
-import OrderHistory from "../components/Pages/InventoryAdmin/OrderHistory/OrderHistory.jsx";
-import CostAnalysis from "../components/organisms/Inventory/Analysis/Cost Analysis/CostAnalysis.jsx";
 import LoginRouting from "../guards/LoginRouting.jsx";
 
 //UserAccout
@@ -251,40 +247,6 @@ const PrivateRoutes = () => (
         <ProtectedRoute allowedRoles={["KITCHEN_STAFF"]}>
           <KitchenStaff />
         </ProtectedRoute>
-      }
-    />
-
-
-    <Route
-      path="/CostAnalysis"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <CostAnalysis />
-        // </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/AnalysisDashboard"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <AnalysisDashboard />
-        // </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/OrderReportDashboard"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <OrderReportDashboard />
-        // </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/OrderHistory"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <OrderHistory />
-        // </ProtectedRoute>
       }
     />
 

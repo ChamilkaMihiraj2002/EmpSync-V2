@@ -42,7 +42,11 @@ const PermissionsList = ({
   useEffect(() => {
     if (selectedOrganization) {
       const org = organizations.find(org => org.id === selectedOrganization);
-      setUsers(org?.users || []);
+      // Filter users by role
+      const filteredUsers = (org?.users || []).filter(
+        user => user.role === 'KITCHEN_ADMIN' || user.role === 'HR_ADMIN'
+      );
+      setUsers(filteredUsers);
       setSelectedUser(null);
       setRolePermissions([]);
       localStorage.setItem('selectedOrganizationId', selectedOrganization);
