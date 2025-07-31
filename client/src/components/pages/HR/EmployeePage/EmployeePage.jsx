@@ -79,13 +79,6 @@ const EmployeePage = () => {
       link: "/FingerPrint",
     },
     {
-      key: "4",
-      label: "Payrolls",
-      action: "Payroll",
-      icon: <FontAwesomeIcon icon={faDollarSign} />,
-      link: "/payroll",
-    },
-    {
       key: "5",
       label: "Schedule",
       action: "Meal Management",

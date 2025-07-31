@@ -13,7 +13,6 @@ import axios from "axios";
 import { usePopup } from "../../../../contexts/PopupContext.jsx";
 import { FaFileImport } from "react-icons/fa6";
 
-
 const { Option } = Select;
 
 const formItemLayout = {
@@ -104,22 +103,26 @@ const Register = () => {
       setLoading(false);
       return;
     }
-    try {
-      await signUpUser({ email, password, id });
-      success("User Registered Successfully");
-      // navigate("/EmployeePage");
-    } catch (err) {
-      await axios.delete(`${urL}/user/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.error("Registration Error:", err);
-      error(
-        `Registration Failed: ${err.response?.data?.message || "Unknown error"}`
-      );
-    } finally {
-      setLoading(false);
+
+    if (role === "KITCHEN_STAFF") {
+      try {
+        await signUpUser({ email, password, id });
+        success("User Registered Successfully");
+      } catch (err) {
+        await axios.delete(`${urL}/user/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.error("Registration Error:", err);
+        error(
+          `Registration Failed: ${
+            err.response?.data?.message || "Unknown error"
+          }`
+        );
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -186,7 +189,7 @@ const Register = () => {
           },
         }}
       >
-        <ImportModal/>
+        <ImportModal />
       </Modal>
       {menu == 1 && (
         <>
@@ -195,9 +198,10 @@ const Register = () => {
             <button
               className={styles.importBtn}
               onClick={() => setIsImportModalOpen(true)}
-            ><><FaFileImport />  Import
-            </>
-               
+            >
+              <>
+                <FaFileImport /> Import
+              </>
             </button>
           </div>
           <Form
@@ -331,10 +335,6 @@ const Register = () => {
                         style={{ width: "100%" }}
                         placeholder="Select Role"
                       >
-                        <Option value="HR_ADMIN">Human Resource Manager</Option>
-                        <Option value="KITCHEN_ADMIN">
-                          Kitchen Administrator
-                        </Option>
                         <Option value="KITCHEN_STAFF">Kitchen Staff</Option>
                         <Option value="Other">Other</Option>
                       </Select>

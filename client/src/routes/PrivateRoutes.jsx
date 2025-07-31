@@ -8,12 +8,8 @@ import Login from "../components/pages/Login/LoginPage/Login.jsx";
 // HR_ADMIN
 import EmployeePage from "../components/pages/HR/EmployeePage/EmployeePage.jsx";
 import RegisterPage from "../components/pages/HR/RegisterPage/RegisterPage.jsx";
-import PayrollPage from "../components/pages/HR/PayrollPage/PayrollPage.jsx";
-import AdjustmentPage from "../components/pages/HR/AdjustmentPage/AdjustmentPage.jsx";
-import PayslipPage from "../components/pages/HR/PayslipPage/PayslipPage.jsx";
 
 // User Portal
-import UserPayrollPage from "../components/pages/UserPortal/PayrollPage.jsx";
 
 // KITCHEN_ADMIN
 import KitchenAdmin from "../components/pages/KitchenAdmin/SchedulePage/KitchenAdmin.jsx";
@@ -130,30 +126,6 @@ const PrivateRoutes = () => (
         </ProtectedRoute>
       }
     />
-    <Route
-      path="/payroll"
-      element={
-        <ProtectedRoute allowedRoles={["HR_ADMIN","KITCHEN_ADMIN"]}>
-          <PayrollPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/adjustment"
-      element={
-        <ProtectedRoute allowedRoles={["HR_ADMIN","KITCHEN_ADMIN"]}>
-          <AdjustmentPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/payslip"
-      element={
-        <ProtectedRoute allowedRoles={["HR_ADMIN","KITCHEN_ADMIN"]}>
-          <PayslipPage />
-        </ProtectedRoute>
-      }
-    />
 
     {/* UserPortal Routes */}
     <Route
@@ -174,14 +146,6 @@ const PrivateRoutes = () => (
       }
     />
 
-    <Route
-      path="/UserPayroll"
-      element={
-        <ProtectedRoute allowedRoles={["*"]}>
-          <UserPayrollPage />
-        </ProtectedRoute>
-      }
-    />
     
 
     {/* KITCHEN_ADMIN Routes */}
