@@ -123,6 +123,8 @@ const Register = () => {
       } finally {
         setLoading(false);
       }
+    } else {
+      setLoading(false);
     }
   };
 
