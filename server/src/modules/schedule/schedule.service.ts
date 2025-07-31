@@ -138,7 +138,7 @@ export class ScheduledMealService {
     }
   }
 
-  // Update a scheduled meal
+  // Update a scheduled meal 
   async update(
     id: number,
     data?: { date?: string; mealTypeId?: number },
@@ -146,7 +146,7 @@ export class ScheduledMealService {
     orgId?: string,
   ) {
     try {
-      // First, fetch the existing scheduled meal
+      // validate the existing scheduled meal exists and belongs to the org
       const existingSchedule =
         await this.databaseService.scheduledMeal.findFirst({
           where: { id, orgId: orgId || undefined },
@@ -156,34 +156,45 @@ export class ScheduledMealService {
         throw new NotFoundException('Scheduled meal not found');
       }
 
-      return await this.databaseService.$transaction(async (prisma) => {
-        const updateData: any = {};
+      // Build the update data object using direct field assignments
+      const updateData: any = {};
 
-        if (data?.date) {
-          updateData.date = new Date(data.date);
-        }
-        if (data?.mealTypeId) {
-          updateData.mealType = { connect: { id: data.mealTypeId } };
-        }
-        if (orgId) {
-          updateData.orgId = orgId;
-        }
-        if (mealIds && mealIds.length > 0) {
-          updateData.meals = {
-            set: mealIds.map((id) => ({ id })),
-          };
-        }
+      
+      if (data?.date) {
+        updateData.date = new Date(data.date);
+      }
 
-        return prisma.scheduledMeal.update({
-          where: { id },
-          data: updateData,
-          include: {
-            mealType: true,
-            meals: true,
-          },
-        });
+    
+      if (data?.mealTypeId) {
+        updateData.mealTypeId = data.mealTypeId;
+      }
+
+    
+      if (orgId) {
+        updateData.orgId = orgId;
+      }
+
+      // Handle meals
+      if (mealIds && mealIds.length > 0) {
+        updateData.meals = {
+          set: mealIds.map((mealId) => ({ id: mealId })),
+        };
+      }
+
+      console.log('Update data being sent to Prisma:', JSON.stringify(updateData, null, 2));
+
+      // Perform the update
+      return await this.databaseService.scheduledMeal.update({
+        where: { id },
+        data: updateData,
+        include: {
+          mealType: true,
+          meals: true,
+          
+        },
       });
     } catch (error) {
+      console.error('Error in update method:', error);
       if (error instanceof NotFoundException) {
         throw error;
       }
