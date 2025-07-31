@@ -8,12 +8,7 @@ import Login from "../components/pages/Login/LoginPage/Login.jsx";
 // HR_ADMIN
 import EmployeePage from "../components/pages/HR/EmployeePage/EmployeePage.jsx";
 import RegisterPage from "../components/pages/HR/RegisterPage/RegisterPage.jsx";
-import PayrollPage from "../components/pages/HR/PayrollPage/PayrollPage.jsx";
-import AdjustmentPage from "../components/pages/HR/AdjustmentPage/AdjustmentPage.jsx";
-import PayslipPage from "../components/pages/HR/PayslipPage/PayslipPage.jsx";
 
-// User Portal
-import UserPayrollPage from "../components/pages/UserPortal/PayrollPage.jsx";
 
 // KITCHEN_ADMIN
 import KitchenAdmin from "../components/pages/KitchenAdmin/SchedulePage/KitchenAdmin.jsx";
@@ -29,16 +24,8 @@ import MealConform from "../components/pages/ServingStaff/MealConfirm/MealConfor
 // KitchenStaff
 import KitchenStaff from "../components/pages/KitchenStaff/kitchenStaff.jsx";
 
-// INVENTORY_ADMIN
-import AnalysisDashboard from "../components/Pages/InventoryAdmin/AnalysisDashboard/AnalysisDashboard.jsx";
-import OrderReportDashboard from "../components/Pages/InventoryAdmin/OrderReportDashboard/OrderReportDashboard.jsx";
-import OrderHistory from "../components/Pages/InventoryAdmin/OrderHistory/OrderHistory.jsx";
-import CostAnalysis from "../components/organisms/Inventory/Analysis/Cost Analysis/CostAnalysis.jsx";
 import LoginRouting from "../guards/LoginRouting.jsx";
 
-//UserAccout
-import ProfilePage from "../components/pages/UserAccount/ProfilePage/ProfilePage.jsx";
-import UserMeals from "../components/pages/UserAccount/MealsPage/MealsPage.jsx";
 
 // SuperAdmin
 import SuperAdmin from "../components/pages/SuperAdmin/SuperAdmin.jsx";
@@ -63,7 +50,6 @@ const PrivateRoutes = () => (
         <ProtectedRoute
           allowedRoles={[
             "HR_ADMIN",
-            "INVENTORY_ADMIN",
             "KITCHEN_ADMIN",
             "KITCHEN_STAFF",
           ]}
@@ -130,58 +116,10 @@ const PrivateRoutes = () => (
         </ProtectedRoute>
       }
     />
-    <Route
-      path="/payroll"
-      element={
-        <ProtectedRoute allowedRoles={["HR_ADMIN","KITCHEN_ADMIN"]}>
-          <PayrollPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/adjustment"
-      element={
-        <ProtectedRoute allowedRoles={["HR_ADMIN","KITCHEN_ADMIN"]}>
-          <AdjustmentPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/payslip"
-      element={
-        <ProtectedRoute allowedRoles={["HR_ADMIN","KITCHEN_ADMIN"]}>
-          <PayslipPage />
-        </ProtectedRoute>
-      }
-    />
 
-    {/* UserPortal Routes */}
-    <Route
-      path="/ProfilePage"
-      element={
-        <ProtectedRoute allowedRoles={["*"]}>
-          <ProfilePage />
-        </ProtectedRoute>
-      }
-    />
 
-    <Route
-      path="/UserMeals"
-      element={
-        <ProtectedRoute allowedRoles={["*"]}>
-          <UserMeals />
-        </ProtectedRoute>
-      }
-    />
 
-    <Route
-      path="/UserPayroll"
-      element={
-        <ProtectedRoute allowedRoles={["*"]}>
-          <UserPayrollPage />
-        </ProtectedRoute>
-      }
-    />
+
     
 
     {/* KITCHEN_ADMIN Routes */}
@@ -250,51 +188,6 @@ const PrivateRoutes = () => (
       element={
         <ProtectedRoute allowedRoles={["KITCHEN_STAFF"]}>
           <KitchenStaff />
-        </ProtectedRoute>
-      }
-    />
-
-
-    <Route
-      path="/CostAnalysis"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <CostAnalysis />
-        // </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/AnalysisDashboard"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <AnalysisDashboard />
-        // </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/OrderReportDashboard"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <OrderReportDashboard />
-        // </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/OrderHistory"
-      element={
-        // <ProtectedRoute allowedRoles={["INVENTORY_ADMIN"]}>
-          <OrderHistory />
-        // </ProtectedRoute>
-      }
-    />
-
-    {/* User account */}
-
-    <Route
-      path="/UserMeals"
-      element={
-        <ProtectedRoute allowedRoles={["*"]}>
-          <UserMeals />
         </ProtectedRoute>
       }
     />

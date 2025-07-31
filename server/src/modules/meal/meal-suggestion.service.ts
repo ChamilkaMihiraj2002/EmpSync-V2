@@ -157,13 +157,6 @@ export class MealSuggestionService {
       },
       include: {
         meals: {
-          include: {
-            ingredients: {
-              include: {
-                ingredient: true,
-              },
-            },
-          },
         },
       },
     });

@@ -4,13 +4,8 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { UserModule } from './core/user/user.module';
 import { MealModule } from './modules/meal/meal.module';
-import { IngredientsModule } from './modules/ingredient/ingredient.module';
-import { PayrollModule } from './modules/payroll/payroll.module';
 import { OrdersModule } from './modules/order/order.module';
 import { ScheduleModule } from './modules/schedule/schedule.module';
-import { AdjustmentModule } from './modules/salary-adjustment/adjustment.module';
-import { IndiAdjustmentModule } from './modules/individual-salary-adjustment/in-adjustment.module';
-import { PayeTaxModule } from './modules/paye-tax-slab/paye-tax.module';
 import { AuthModule } from './core/authentication/auth.module';
 import { ScheduleModule as NestScheduleModule } from '@nestjs/schedule';
 import { MealsServingModule } from './modules/meals-serving/meals-serving.module';
@@ -27,16 +22,11 @@ import { HrFingerprintsModule } from './modules/hr-fingerprints/hr-fingerprints.
     NestScheduleModule.forRoot(),
     DatabaseModule,
     UserModule,
-    IngredientsModule,
     MealModule,
-    PayrollModule,
     OrdersModule,
     SuperAdminAuthModule,
     ScheduleModule,
     MealTypeModule,
-    AdjustmentModule,
-    IndiAdjustmentModule,
-    PayeTaxModule,
     AuthModule,
     MealsServingModule,
     SuperAdminModule,

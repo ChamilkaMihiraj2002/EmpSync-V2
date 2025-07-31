@@ -58,7 +58,6 @@ const getDarkTheme = () => ({
 const roleMap = {
   KITCHEN_ADMIN: "Kitchen Administrator",
   KITCHEN_STAFF: "Kitchen Staff",
-  INVENTORY_ADMIN: "Inventory Manager",
   HR_ADMIN: "Human Resource Manager",
 };
 

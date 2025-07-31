@@ -49,10 +49,9 @@ export class MealController {
     @Query('orgId') orgId?: string,
   ) {
     try {
-      const { ingredients, ...mealData } = createMealDto;
+      const {...mealData } = createMealDto;
       return await this.mealService.createWithIngredients(
         mealData,
-        ingredients,
         orgId,
       );
     } catch (error) {

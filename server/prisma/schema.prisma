@@ -25,13 +25,8 @@ model Organization {
   updatedAt               DateTime @updatedAt
   users                   User[]
   fingerprints                Fingerprint[]
-  ingredients                 Ingredient[]
-  payrolls                    Payroll[]
   meals                       Meal[]
-  salaryAdjustments           SalaryAdjustments[]
-  individualSalaryAdjustments IndividualSalaryAdjustments[]
   orders                      Order[]
-  payeTaxSlabs                PayeTaxSlab[]
   mealTypes                   MealType[]
   ScheduledMeals             ScheduledMeal[]
 }
@@ -59,13 +54,11 @@ model User {
   language       String?
   height         Int?
   weight         Int?
-  payrolls       Payroll[]
   organizationId String
   organization   Organization? @relation(fields: [organizationId], references: [id])
   permissions    Permission[]
   userPermissions UserPermission[]
   createdAt      DateTime      @default(now())
-  individualSalaryAdjustments IndividualSalaryAdjustments[] 
 }
 
 enum Gender {
@@ -95,31 +88,6 @@ model UserPermission {
   @@unique([userId, permissionId])
 }
 
-
-model Ingredient {
-  id             Int              @id @default(autoincrement())
-  orgId          String        
-  name           String
-  createdAt      DateTime         @default(now())
-  usedInMeals    MealIngredient[]
-  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-}
-
-
-model Payroll {
-  id         Int        @id @default(autoincrement())
-  orgId      String
-  empId      String
-  employee   User       @relation(fields: [empId], references: [id], onDelete: Cascade)
-  range      DateTime[]
-  month      String
-  netPay     Float
-  payrollPdf String
-  createdAt  DateTime   @default(now())
-  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  @@unique([id, month])
-}
-
 model Meal {
   id          Int              @id @default(autoincrement())
   orgId       String
@@ -132,38 +100,7 @@ model Meal {
   imageUrl    String?
   category    String[]
   createdAt   DateTime         @default(now())
-  ingredients MealIngredient[]
   schedules   ScheduledMeal[]
-  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-}
-
-model MealIngredient {
-  id           Int        @id @default(autoincrement())
-  meal         Meal       @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  mealId       Int
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
-  ingredientId Int
-}
-
-model SalaryAdjustments {
-  id           Int     @id @default(autoincrement())
-  orgId        String
-  label        String
-  isPercentage Boolean //Percentage or Value
-  allowance    Boolean //Allowance or Deduction
-  amount       Float?
-  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-}
-
-model IndividualSalaryAdjustments {
-  id           Int     @id @default(autoincrement())
-  empId        String
-  orgId        String
-  label        String
-  isPercentage Boolean
-  allowance    Boolean
-  amount       Float
-  employee User @relation(fields: [empId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }
 
@@ -192,15 +129,6 @@ model ScheduledMeal {
   @@unique([date, mealTypeId])
 }
 
-model PayeTaxSlab {
-  id         Int    @id @default(autoincrement())
-  orgId      String
-  orderId    Int
-  lowerLimit Float
-  upperLimit Float?
-  taxRate    Float
-  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-}
 
 model MealType {
   id        Int             @id @default(autoincrement())

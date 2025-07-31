@@ -6,8 +6,6 @@ import axios from "axios";
 import Loading from "../../../atoms/loading/loading";
 import { usePopup } from "../../../../contexts/PopupContext.jsx";
 
-
-
 // These columns must match your CSV headers and form fields
 const REQUIRED_COLUMNS = [
   "Full Name",
@@ -52,9 +50,12 @@ const validateRow = (row, idx) => {
       `Row ${idx + 2}: Gender is required and must be Male, Female, or Other.`
     );
   }
-  // Job Role: required, not empty
+  // Job Role: required, not empty, and not restricted
+  const restrictedRoles = ["KITCHEN_ADMIN", "KITCHEN_STAFF", "HR_ADMIN"];
   if (!row["Job Role"] || row["Job Role"].trim() === "") {
     errors.push(`Row ${idx + 2}: Job Role is required.`);
+  } else if (restrictedRoles.includes(row["Job Role"].trim())) {
+    errors.push(`Row ${idx + 2}: Job Role cannot be ${row["Job Role"]}. This role is restricted.`);
   }
   // Date of Birth: required, valid date (YYYY-MM-DD)
   if (
@@ -158,7 +159,6 @@ const ImportModal = () => {
     for (let i = 0; i < previewData.length; i++) {
       const row = previewData[i];
 
-
       // Use generated ID
       let id = generatedIds[i];
 
@@ -194,34 +194,6 @@ const ImportModal = () => {
         });
         setProgress(Math.round(((i + 1) / previewData.length) * 100));
         continue;
-      }
-
-      try {
-        // 2. Register in Auth0
-        await signUpUser({
-          email: row["E-mail"],
-          password: row["Password"] || "Test12345.", // Use password from CSV or fallback
-          id,
-        });
-      } catch (err) {
-        // Rollback backend user if Auth0 fails
-        if (id) {
-          try {
-            await axios.delete(`${urL}/user/${id}`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-          } catch (delErr) {
-            // Optionally log rollback error
-          }
-        }
-        failedRowsArr.push({
-          idx: i,
-          name: row["Full Name"],
-          email: row["E-mail"],
-          reason: err.response?.data?.message || "Auth0 error",
-        });
       }
       setProgress(Math.round(((i + 1) / previewData.length) * 100));
     }
@@ -301,9 +273,7 @@ const ImportModal = () => {
 
   return (
     <div className={styles.importModalContainer}>
-      <h3 className={styles.title}>Import Employee Data (.CSV)
-
-</h3>
+      <h3 className={styles.title}>Import Employee Data (.CSV)</h3>
       <p className={styles.desc}>Select a CSV file to import employee data.</p>
       <div
         style={{
@@ -336,6 +306,12 @@ const ImportModal = () => {
           Clear
         </button>
       </div>
+      
+      <div className={styles.instructions}>
+        <p><strong>Mandatory CSV Fields:</strong></p>
+        <p>Full Name, Employee No, E-mail, Phone Number, Gender, Job Role, Date of Birth, Residential Address, Preferred Language, Basic Salary (LKR)</p>
+      </div>
+      
       <input
         type="file"
         accept=".csv"

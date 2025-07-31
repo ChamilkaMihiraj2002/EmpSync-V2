@@ -13,7 +13,6 @@ const { Sider } = Layout;
 
 const roleDisplayMap = {
   HR_ADMIN: "Human Resource Manager",
-  INVENTORY_ADMIN: "Inventory Manager",
   KITCHEN_STAFF: "Kitchen Staff",
   KITCHEN_ADMIN: "Kitchen Administrator",
 };
@@ -107,17 +106,9 @@ const NavBar = ({ Comp, titleLines = [], menuItems = [] }) => {
   };
 
   const dropdownItems = [
+
     {
       key: "1",
-      label: (
-        <div className={`${styles.profileMenuItem} ${theme === "dark" ? styles.darkMenuItem : ""}`}>
-          <UserOutlined className={styles.menuItemIcon} /> &nbsp;Profile
-        </div>
-      ),
-      onClick: () => navigate("/profile"),
-    },
-    {
-      key: "2",
       label: (
         <div className={`${styles.logoutMenuItem} ${theme === "dark" ? styles.darkLogoutMenuItem : ""}`}>
           <LogoutOutlined className={styles.menuItemIcon} />

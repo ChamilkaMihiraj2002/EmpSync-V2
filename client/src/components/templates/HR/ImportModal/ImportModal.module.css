@@ -157,6 +157,39 @@
   cursor: not-allowed;
 }
 
+.instructions {
+  margin: 16px 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #960000;
+}
+
+.instructions p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+  color: #555;
+  text-align: left;
+}
+
+.instructions p:first-child {
+  font-weight: 600;
+  color: #960000;
+}
+
+:global(.dark) .instructions {
+  background: #2a2a2a;
+  border-left-color: #ff6b6b;
+}
+
+:global(.dark) .instructions p {
+  color: #cccccc;
+}
+
+:global(.dark) .instructions p:first-child {
+  color: #ff6b6b;
+}
+
 :global(.dark) .previewTable{
   color: #000000;
 }
