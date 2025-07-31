@@ -37,50 +37,9 @@ const AddMealPage = () => {
   const [imageUrl, setImageUrl] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const fileInputRef = useRef(null);
-  const [isIngredientsModalVisible, setIsIngredientsModalVisible] =
-    useState(false);
-  const [ingredients, setIngredients] = useState([]);
-  const [searchIngredient, setSearchIngredient] = useState("");
-  const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [loadingIngredients, setLoadingIngredients] = useState(false);
-  const [newIngredientName, setNewIngredientName] = useState("");
-  const [addingIngredient, setAddingIngredient] = useState(false);
-
 
   const navigate = useNavigate();
-
-  // Fetch ingredients from API using axios with orgId
-  const fetchIngredients = async () => {
-  setLoadingIngredients(true);
-  try {
-    const response = await axios.get(`${urL}/ingredients/org/${authData?.orgId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = Array.isArray(response.data) ? response.data : [];
-
-    const formattedIngredients = data.map((ingredient) => ({
-      id: ingredient.id,
-      name: ingredient.name,
-      selected: false,
-    }));
-
-    setIngredients(formattedIngredients);
-
-    if (formattedIngredients.length === 0) {
-      message.warning("No ingredients found");
-    }
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || error.message;
-    message.error(`Error fetching ingredients: ${errorMessage}`);
-    setIngredients([]);
-  } finally {
-    setLoadingIngredients(false);
-  }
-};
 
   const handleCancel = () => {
     form.resetFields();
@@ -94,10 +53,6 @@ const AddMealPage = () => {
       message.warning("Please select an image for the meal");
       return;
     }
-    if (selectedIngredients.length === 0) {
-          message.warning("Please select  ingredients for the meal");
-          return;
-        }
 
     setUploading(true);
 
@@ -109,11 +64,6 @@ const AddMealPage = () => {
       // Get the download URL of the uploaded image
       const downloadURL = await getDownloadURL(imageRef);
 
-      // Format ingredients data
-      const ingredientsData = selectedIngredients.map((ingredient) => ({
-        ingredientId: parseInt(ingredient.id),
-      }));
-
       const mealData = {
         nameEnglish: values.nameEnglish,
         nameSinhala: values.nameSinhala,
@@ -122,7 +72,6 @@ const AddMealPage = () => {
         category: values.category || [],
         price: parseFloat(values.price),
         imageUrl: downloadURL,
-        ingredients: ingredientsData,
       };
 
       console.log("Submitting meal data:", mealData);
@@ -141,7 +90,6 @@ const AddMealPage = () => {
         form.resetFields();
         setImageUrl(null);
         setImageFile(null);
-        setSelectedIngredients([]);
         navigate("/kitchen-meal");
       }
     } catch (error) {
@@ -178,81 +126,6 @@ const AddMealPage = () => {
     };
     reader.readAsDataURL(file);
   };
-
-  const showIngredientsModal = () => {
-    setIsIngredientsModalVisible(true);
-    fetchIngredients();
-  };
-
-  const handleIngredientsModalCancel = () => {
-    setIsIngredientsModalVisible(false);
-  };
-
-  const handleIngredientsSearch = (e) => {
-    setSearchIngredient(e.target.value);
-  };
-
-  const handleIngredientSelect = (id) => {
-    setIngredients(
-      ingredients.map((ingredient) =>
-        ingredient.id === id
-          ? { ...ingredient, selected: !ingredient.selected }
-          : ingredient
-      )
-    );
-  };
-
-  const handleIngredientsConfirm = () => {
-    const selected = ingredients.filter((ingredient) => ingredient.selected);
-    setSelectedIngredients(selected);
-    setIsIngredientsModalVisible(false);
-
-    if (selected.length > 0) {
-      message.success(`${selected.length} ingredients selected`);
-    } else {
-          message.warning("No ingredients selected");
-        }
-  };
-
-  const filteredIngredients = ingredients.filter((ingredient) =>
-    ingredient.name.toLowerCase().includes(searchIngredient.toLowerCase())
-  );
-
-  const handleAddNewIngredient = async () => {
-  if (!newIngredientName.trim()) {
-    message.warning("Ingredient name cannot be empty.");
-    return;
-  }
-
-  setAddingIngredient(true);
-
-  try {
-    const response = await axios.post(
-      `${urL}/ingredients`,
-      {
-        name: newIngredientName.trim(),
-        orgId: authData?.orgId,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (response.status === 201 || response.status === 200) {
-      message.success("Ingredient added successfully!");
-      setNewIngredientName("");
-      fetchIngredients(); // Refresh ingredient list
-    }
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || error.message;
-    message.error(`Failed to add ingredient: ${errorMessage}`);
-  } finally {
-    setAddingIngredient(false);
-  }
-
-};
 
   return (
     <div className={styles.pageContainer}>
@@ -401,31 +274,6 @@ const AddMealPage = () => {
                 <Form.Item label="Description" name="description">
                   <TextArea placeholder="Enter meal description" rows={4} />
                 </Form.Item>
-
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    block
-                    className={styles.ingredientsButton}
-                    onClick={showIngredientsModal}
-                    disabled={uploading}
-                  >
-                    Choose Ingredients
-                  </Button>
-                </Form.Item>
-
-                {selectedIngredients.length > 0 && (
-                  <div className={styles.selectedIngredientsContainer}>
-                    <p className={styles.selectedIngredientsTitle}>
-                      Selected Ingredients:
-                    </p>
-                    <ul className={styles.selectedIngredientsList}>
-                      {selectedIngredients.map((ingredient) => (
-                        <li key={ingredient.id}>{ingredient.name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </Col>
             </Row>
 
@@ -454,81 +302,6 @@ const AddMealPage = () => {
           </Form>
         </Card>
       </div>
-
-      <Modal
-        title="Available Ingredients"
-        open={isIngredientsModalVisible}
-        onCancel={handleIngredientsModalCancel}
-        footer={null}
-        width={800}
-        className={styles.ingredientsModal}
-      >
-        <div className={styles.ingredientsSearchContainer}>
-          <Input
-            placeholder="Search ingredients"
-            prefix={<SearchOutlined />}
-            value={searchIngredient}
-            onChange={handleIngredientsSearch}
-            className={styles.ingredientsSearchInput}
-          />
-          <Button className={styles.searchButton}>Search</Button>
-        </div>
-
-        <div className={styles.addNewIngredientSection}>
-          <Input
-            placeholder="New ingredient name"
-            value={newIngredientName}
-            onChange={(e) => setNewIngredientName(e.target.value)}
-            className={styles.newIngredientInput}
-          />
-          <Button
-            type="dashed"
-            onClick={handleAddNewIngredient}
-            loading={addingIngredient}
-            disabled={!newIngredientName.trim()}
-            className={styles.addIngredientButton}
-          >
-            Add Ingredient
-          </Button>
-        </div>
-
-        <div className={styles.ingredientsListContainer}>
-          {loadingIngredients ? (
-            <div className={styles.loadingContainer}>
-              <Spin size="large" />
-              <p>Loading ingredients...</p>
-            </div>
-          ) : filteredIngredients.length > 0 ? (
-            filteredIngredients.map((ingredient) => (
-              <div key={ingredient.id} className={styles.ingredientItem}>
-                <div className={styles.ingredientNameContainer}>
-                  <Checkbox
-                    checked={ingredient.selected}
-                    onChange={() => handleIngredientSelect(ingredient.id)}
-                    className={styles.ingredientCheckbox}
-                  >
-                    {ingredient.name}
-                  </Checkbox>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className={styles.noIngredientsMessage}>
-              No ingredients found. Try adjusting your search.
-            </div>
-            )}
-        </div>
-
-        <div className={styles.modalFooter}>
-          <Button
-            type="primary"
-            className={styles.confirmButton}
-            onClick={handleIngredientsConfirm}
-          >
-            Confirm
-          </Button>
-        </div>
-      </Modal>
     </div>
   );
 };

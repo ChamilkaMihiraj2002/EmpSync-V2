@@ -25,7 +25,11 @@ model Organization {
   updatedAt               DateTime @updatedAt
   users                   User[]
   fingerprints                Fingerprint[]
+<<<<<<< Updated upstream
   ingredients                 Ingredient[]
+=======
+  payrolls                    Payroll[]
+>>>>>>> Stashed changes
   meals                       Meal[]
   orders                      Order[]
   mealTypes                   MealType[]
@@ -89,6 +93,7 @@ model UserPermission {
   @@unique([userId, permissionId])
 }
 
+<<<<<<< Updated upstream
 model Ingredient {
   id             Int              @id @default(autoincrement())
   orgId          String        
@@ -96,6 +101,21 @@ model Ingredient {
   createdAt      DateTime         @default(now())
   usedInMeals    MealIngredient[]
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+=======
+
+model Payroll {
+  id         Int        @id @default(autoincrement())
+  orgId      String
+  empId      String
+  employee   User       @relation(fields: [empId], references: [id], onDelete: Cascade)
+  range      DateTime[]
+  month      String
+  netPay     Float
+  payrollPdf String
+  createdAt  DateTime   @default(now())
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  @@unique([id, month])
+>>>>>>> Stashed changes
 }
 
 model Meal {
@@ -110,17 +130,39 @@ model Meal {
   imageUrl    String?
   category    String[]
   createdAt   DateTime         @default(now())
-  ingredients MealIngredient[]
   schedules   ScheduledMeal[]
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }
 
+<<<<<<< Updated upstream
 model MealIngredient {
   id           Int        @id @default(autoincrement())
   meal         Meal       @relation(fields: [mealId], references: [id], onDelete: Cascade)
   mealId       Int
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
   ingredientId Int
+=======
+model SalaryAdjustments {
+  id           Int     @id @default(autoincrement())
+  orgId        String
+  label        String
+  isPercentage Boolean //Percentage or Value
+  allowance    Boolean //Allowance or Deduction
+  amount       Float?
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+model IndividualSalaryAdjustments {
+  id           Int     @id @default(autoincrement())
+  empId        String
+  orgId        String
+  label        String
+  isPercentage Boolean
+  allowance    Boolean
+  amount       Float
+  employee User @relation(fields: [empId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+>>>>>>> Stashed changes
 }
 
 model Order {

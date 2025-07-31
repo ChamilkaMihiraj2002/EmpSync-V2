@@ -12,13 +12,6 @@ export class MealsServingService {
     try {
       const meal = await this.databaseService.meal.findUnique({
         where: { id },
-        include: {
-          ingredients: {
-            include: {
-              ingredient: true,
-            },
-          },
-        },
       });
 
       if (!meal) {
@@ -277,13 +270,6 @@ export class MealsServingService {
                 nameEnglish: true,
                 imageUrl: true,
                 description: true,
-                ingredients: {
-                  include: {
-                    ingredient: {
-                      select: { name: true }
-                    }
-                  }
-                }
               }
             }
           }
@@ -305,7 +291,6 @@ export class MealsServingService {
         scheduled.meals.forEach(meal => {
           const mealWithIngredients = {
             ...meal,
-            ingredients: meal.ingredients.map(mi => mi.ingredient.name)
           };
           scheduledMealsByType.get(scheduled.mealTypeId)!.push(mealWithIngredients);
           allScheduledMeals.set(meal.id, mealWithIngredients);
