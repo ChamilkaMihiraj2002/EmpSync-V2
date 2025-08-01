@@ -11,6 +11,7 @@ import { MdSync } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import FingerprintBLE from "../../../../utils/fingerprintBLE.js";
 import { useMealData } from "../../../../contexts/MealDataContext.jsx";
+import { useAuth } from "../../../../contexts/AuthContext.jsx";
 
 const Page2 = ({
   carouselRef,
@@ -20,10 +21,12 @@ const Page2 = ({
   setUserId,
   resetPin,
   setResetPin,
+  isActive = true, // Add prop to track if this slide is active
 }) => {
   const navigate = useNavigate();
   const baseURL = import.meta.env.VITE_BASE_URL;
   const { preloadMealData, clearData } = useMealData(); // Add meal data context
+  const { authData } = useAuth(); // Add auth context
   const [errorMessage, setErrorMessage] = useState("");
   const [pin, setPin] = useState("");
   const text = translations[language];
@@ -36,6 +39,45 @@ const Page2 = ({
   const [fingerprintBLE, setFingerprintBLE] = useState(null);
   const [showFingerprintPopup, setShowFingerprintPopup] = useState(false);
   const [verifiedMessage, setVerifiedMessage] = useState("");
+
+  // Manage focus and tabIndex based on whether this slide is active
+  useEffect(() => {
+    // Use a ref or find the closest parent container
+    const pageContainers = document.querySelectorAll('[class*="contentStyle2"]');
+    let pageElement = null;
+    
+    // Find the container that has Page2 content
+    for (let container of pageContainers) {
+      if (container.querySelector(`.${styles.full}`)) {
+        pageElement = container;
+        break;
+      }
+    }
+    
+    if (!pageElement) return;
+
+    const focusableElements = pageElement.querySelectorAll(
+      'button, input, select, textarea, [tabindex]:not([tabindex="-1"]), a[href]'
+    );
+
+    focusableElements.forEach(element => {
+      if (isActive) {
+        // Remove tabindex restriction when active
+        if (element.hasAttribute('data-original-tabindex')) {
+          const originalTabIndex = element.getAttribute('data-original-tabindex');
+          element.setAttribute('tabindex', originalTabIndex);
+          element.removeAttribute('data-original-tabindex');
+        }
+      } else {
+        // Store original tabindex and set to -1 when inactive
+        if (!element.hasAttribute('data-original-tabindex')) {
+          const currentTabIndex = element.getAttribute('tabindex') || '0';
+          element.setAttribute('data-original-tabindex', currentTabIndex);
+        }
+        element.setAttribute('tabindex', '-1');
+      }
+    });
+  }, [isActive]);
 
   // Check for existing fingerprint connection on component mount
   useEffect(() => {
@@ -203,7 +245,13 @@ const Page2 = ({
       // Check which thumbIds are not in the database
       try {
         setErrorMessage("Checking database for registered fingerprints...");
-        const response = await fetch(`${baseURL}/user-finger-print-register-backend/all-fingerprints`);
+        const headers = {};
+        if (authData?.accessToken) {
+          headers.Authorization = `Bearer ${authData.accessToken}`;
+        }
+        const response = await fetch(`${baseURL}/user-finger-print-register-backend/all-fingerprints`, {
+          headers
+        });
         if (response.ok) {
           const dbFingerprints = await response.json();
           const dbThumbIds = dbFingerprints.map(fp => fp.thumbid);
@@ -371,7 +419,14 @@ const Page2 = ({
   // Fetch employee ID by thumbid (fingerprint ID) and set username for Page3
   const fetchUserByFingerprintId = async (fingerId) => {
     try {
-      const response = await fetch(`${baseURL}/user-finger-print-register-backend/fingerprint?thumbid=${fingerId}`);
+      const headers = {};
+      if (authData?.accessToken) {
+        headers.Authorization = `Bearer ${authData.accessToken}`;
+      }
+
+      const response = await fetch(`${baseURL}/user-finger-print-register-backend/fingerprint?thumbid=${fingerId}`, {
+        headers
+      });
       if (!response.ok) {
         throw new Error("Fingerprint not found");
       }
@@ -380,7 +435,9 @@ const Page2 = ({
       if (!empId) {
         throw new Error("No employee ID found for this fingerprint");
       }
-      const userResponse = await fetch(`${baseURL}/user/${empId}`);
+      const userResponse = await fetch(`${baseURL}/user/${empId}`, {
+        headers
+      });
       if (!userResponse.ok) {
         throw new Error("User not found for this employee ID");
       }
@@ -423,7 +480,13 @@ const Page2 = ({
     if (pin.length === 6) {
       setScanning(true);
       try {
-        const response = await fetch(`${baseURL}/user/passkey/${pin}`);
+        const headers = {};
+        if (authData?.accessToken) {
+          headers.Authorization = `Bearer ${authData.accessToken}`;
+        }
+        const response = await fetch(`${baseURL}/user/passkey/${pin}`, {
+          headers
+        });
         if (!response.ok) {
           throw new Error("User not found");
         }

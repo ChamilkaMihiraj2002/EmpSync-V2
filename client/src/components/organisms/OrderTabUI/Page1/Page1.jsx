@@ -6,7 +6,7 @@ import styles from './Page1.module.css'; // Import CSS module for styling
 import DateAndTime from '../DateAndTime/DateAndTime.jsx'; // Import DateAndTime component
 
 // Page1 component for the welcome and language selection screen
-const Page1 = ({ carouselRef, setLanguage }) => {
+const Page1 = ({ carouselRef, setLanguage, isActive = true }) => {
     // Handle language selection and carousel navigation
     const handleLanguageSelect = (language) => {
         console.log(`${language} selected`);
