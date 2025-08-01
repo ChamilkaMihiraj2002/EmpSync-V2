@@ -389,16 +389,6 @@ const AvailableMeals = () => {
                           Rs.{meal.price?.toFixed(2)}
                         </span>
                       </div>
-                      <div
-                        className={styles.ingredientsLink}
-                        onClick={() => showIngredientsModal(meal)}
-                      >
-                        Ingredients{" "}
-                        <FontAwesomeIcon
-                          icon={faArrowUpRightFromSquare}
-                          style={{ marginLeft: "4px" }}
-                        />
-                      </div>
                     </div>
                   </div>
 
@@ -410,14 +400,14 @@ const AvailableMeals = () => {
                       onClick={() => showDeleteConfirm(meal)}
                       loading={loading}
                     >
-                      Delete
+                      
                     </Button>
                     <Button
                       type="text"
                       icon={<EditOutlined />}
                       onClick={() => handleEdit(meal)}
                     >
-                      Edit
+                    
                     </Button>
                   </div>
                 </Card>
