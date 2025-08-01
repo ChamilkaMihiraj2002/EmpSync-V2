@@ -73,6 +73,7 @@ const Page3 = ({
   userId,
   carouselRef,
   setResetPin,
+  isActive = true,
 }) => {
   const { authData } = useAuth();
   const baseURL = import.meta.env.VITE_BASE_URL;
