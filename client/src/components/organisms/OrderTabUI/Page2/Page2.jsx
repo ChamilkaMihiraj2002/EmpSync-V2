@@ -21,6 +21,7 @@ const Page2 = ({
   setUserId,
   resetPin,
   setResetPin,
+  isActive = true, // Add prop to track if this slide is active
 }) => {
   const navigate = useNavigate();
   const baseURL = import.meta.env.VITE_BASE_URL;
@@ -38,6 +39,45 @@ const Page2 = ({
   const [fingerprintBLE, setFingerprintBLE] = useState(null);
   const [showFingerprintPopup, setShowFingerprintPopup] = useState(false);
   const [verifiedMessage, setVerifiedMessage] = useState("");
+
+  // Manage focus and tabIndex based on whether this slide is active
+  useEffect(() => {
+    // Use a ref or find the closest parent container
+    const pageContainers = document.querySelectorAll('[class*="contentStyle2"]');
+    let pageElement = null;
+    
+    // Find the container that has Page2 content
+    for (let container of pageContainers) {
+      if (container.querySelector(`.${styles.full}`)) {
+        pageElement = container;
+        break;
+      }
+    }
+    
+    if (!pageElement) return;
+
+    const focusableElements = pageElement.querySelectorAll(
+      'button, input, select, textarea, [tabindex]:not([tabindex="-1"]), a[href]'
+    );
+
+    focusableElements.forEach(element => {
+      if (isActive) {
+        // Remove tabindex restriction when active
+        if (element.hasAttribute('data-original-tabindex')) {
+          const originalTabIndex = element.getAttribute('data-original-tabindex');
+          element.setAttribute('tabindex', originalTabIndex);
+          element.removeAttribute('data-original-tabindex');
+        }
+      } else {
+        // Store original tabindex and set to -1 when inactive
+        if (!element.hasAttribute('data-original-tabindex')) {
+          const currentTabIndex = element.getAttribute('tabindex') || '0';
+          element.setAttribute('data-original-tabindex', currentTabIndex);
+        }
+        element.setAttribute('tabindex', '-1');
+      }
+    });
+  }, [isActive]);
 
   // Check for existing fingerprint connection on component mount
   useEffect(() => {
