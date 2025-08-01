@@ -7,8 +7,7 @@ import {
 } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import axios from 'axios';
-import * as dotenv from 'dotenv';
-dotenv.config();
+
 
 @Injectable()
 export class SuperAdminAuthService {

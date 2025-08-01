@@ -1,9 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./UserFingerPrintRegister.module.css";
-// import bgImage from "../../../../assets/Login/loginbackground.png";
 import otbImage from "../../../../assets/Order/otb1.jpg";
-
 import fingerprintIcon from "../../../../assets/Order/fingerprints-icons-5897.png";
 import FingerPrint from "../../../atoms/FingerPrint/FingerPrint.jsx";
 import FingerprintBLE from "../../../../utils/fingerprintBLE.js";

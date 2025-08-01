@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Form, Input, Button, Switch, InputNumber } from 'antd';
+import { Modal, Form, Input, Button } from 'antd';
 import styles from './AddOrganizationModal.module.css';
 
 const AddOrganizationModal = ({ visible, onSubmit, onCancel }) => {

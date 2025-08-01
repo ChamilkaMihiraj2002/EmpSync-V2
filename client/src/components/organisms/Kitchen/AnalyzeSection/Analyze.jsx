@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import styles from "./Analyze.module.css";
 import axios from "axios";
 import { Card, Progress } from "antd";

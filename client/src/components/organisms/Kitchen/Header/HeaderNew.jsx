@@ -1,6 +1,5 @@
 // Navbar.jsx
-import React from "react";
-import { Layout, Button, Typography, Avatar, Space, Dropdown } from "antd";
+import { Layout, Button, Avatar, Space, Dropdown } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import styles from "./header.module.css";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";

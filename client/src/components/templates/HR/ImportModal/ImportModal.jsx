@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Papa from "papaparse";
 import { useAuth } from "../../../../contexts/AuthContext";
 import styles from "./ImportModal.module.css";

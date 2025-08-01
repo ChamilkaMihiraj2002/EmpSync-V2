@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, Statistic, Table, Spin, message } from 'antd';
 import {
   ApartmentOutlined,

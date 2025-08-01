@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import  { useState, useRef, useEffect } from "react";
 import {
   Form,
   Input,
@@ -8,15 +8,12 @@ import {
   Col,
   Typography,
   message,
-  Modal,
-  Checkbox,
   Spin,
   Select,
 } from "antd";
 import {
   UploadOutlined,
   FileImageOutlined,
-  SearchOutlined,
 } from "@ant-design/icons";
 import styles from "./Edit.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
