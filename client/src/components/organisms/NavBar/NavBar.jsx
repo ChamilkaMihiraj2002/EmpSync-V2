@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./NavBar.module.css";
 import { MenuOutlined, LogoutOutlined } from "@ant-design/icons";
 import { UserOutlined } from "@ant-design/icons";

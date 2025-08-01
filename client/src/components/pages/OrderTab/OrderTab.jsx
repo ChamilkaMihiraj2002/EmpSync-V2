@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Carousel } from 'antd';
 import styles from './OrderTab.module.css'; // Import CSS module for styling
 import Page1 from "../../organisms/OrderTabUI/Page1/Page1.jsx"; // Import Page1 component

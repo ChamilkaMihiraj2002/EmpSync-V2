@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "antd";
 import { CloseOutlined, CalendarOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";

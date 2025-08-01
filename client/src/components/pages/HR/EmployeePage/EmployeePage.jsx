@@ -1,8 +1,6 @@
-import React from "react";
 import {
   faUsers,
   faUserPlus,
-  faDollarSign,
   faFingerprint,
   faCalendar,
   faChartLine,
@@ -12,7 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import NavBar from '../../../organisms/NavBar/NavBar.jsx';
-import Employees from "../../../Organisms/HR/EmployeeList/Employees.jsx";
+import Employees from "../../../organisms/HR/EmployeeList/Employees.jsx";
 import { useAuth } from "../../../../contexts/AuthContext.jsx"; 
 
 const EmployeePage = () => {

@@ -9,7 +9,7 @@ import styles from "./Employee.module.css";
 import SearchBar from "../../../molecules/SearchBar/SearchBar.jsx";
 import { Toaster, toast } from "sonner";
 import { useAuth } from "../../../../contexts/AuthContext.jsx";
-import { debounce } from "lodash";
+import debounce from 'just-debounce-it';
 import { usePopup } from "../../../../contexts/PopupContext.jsx";
 import { useTheme } from "../../../../contexts/ThemeContext.jsx";
 

@@ -8,7 +8,7 @@ import {
   MenuUnfoldOutlined,
   DashboardOutlined  
 } from '@ant-design/icons';
-import React, { useEffect , useState } from 'react';
+import  {  useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import { useAuth } from "../../../../../contexts/AuthContext.jsx";

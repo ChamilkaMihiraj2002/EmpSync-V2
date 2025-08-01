@@ -1,4 +1,3 @@
-import React from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "../../src/guards/ProtectedRoutes.jsx";
 import SuperAdminProtectedRoute from "../../src/guards/SuperAdminProtectedRoute.jsx";

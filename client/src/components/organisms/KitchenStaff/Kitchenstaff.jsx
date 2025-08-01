@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Calendar, Plus, Trash2 } from "lucide-react";
-import { DatePicker, Card, Spin, message } from "antd";
+import  { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import {  Card, Spin, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext"; // Add authentication context
 import "antd/dist/reset.css";
 import styles from "./KitchenStaff.module.css";
 import '../../../styles/variables.css';
 
-const { Meta } = Card;
 
 // Cart component styles
 const cartStyles = {

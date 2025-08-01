@@ -1,4 +1,3 @@
-import React from "react";
 import { Space, Input } from "antd";
 
 const SearchBar = ({ placeholder, onChange, onSearch, styles }) => {

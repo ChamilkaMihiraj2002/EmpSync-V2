@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import PasswordReset from "../components/pages/Login/PasswordReset/PasswordReset.jsx";
 import FingerPrintPage from '../components/pages/HR/FingerPrintPage/FingerPrintPage.jsx';
@@ -9,7 +8,6 @@ import MealPage03 from '../components/organisms/UserPortal/MealPage03/MealPage03
 import PrivateRoutes from "./PrivateRoutes.jsx";
 import { NotificationsProvider } from "../contexts/NotificationsContext.jsx";
 import { PopupProvider } from "../contexts/PopupContext.jsx";
-import { ThemeProvider } from "../contexts/ThemeContext.jsx";
 import { MealDataProvider } from "../contexts/MealDataContext.jsx";
 import FingerPrints from '../components/organisms/HR/FingerPrints/FingerPrints.jsx';
 

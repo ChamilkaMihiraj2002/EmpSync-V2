@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Layout, Space, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import WelcomeSection from '../../../organisms/Serving/WelcomeSection/WelcomeSection.jsx';
