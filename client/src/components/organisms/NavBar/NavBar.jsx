@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./NavBar.module.css";
 import { MenuOutlined, LogoutOutlined } from "@ant-design/icons";
 import { UserOutlined } from "@ant-design/icons";
@@ -88,6 +88,7 @@ const NavBar = ({ Comp, titleLines = [], menuItems = [] }) => {
   }, [location.pathname]);
 
   useEffect(() => {
+
     if (authData) {
       setCurrentUser(authData.user);
     }
@@ -106,9 +107,17 @@ const NavBar = ({ Comp, titleLines = [], menuItems = [] }) => {
   };
 
   const dropdownItems = [
-
     {
       key: "1",
+      label: (
+        <div className={`${styles.profileMenuItem} ${theme === "dark" ? styles.darkMenuItem : ""}`}>
+          <UserOutlined className={styles.menuItemIcon} /> &nbsp;Profile
+        </div>
+      ),
+      onClick: () => navigate("/ProfilePage"),
+    },
+    {
+      key: "2",
       label: (
         <div className={`${styles.logoutMenuItem} ${theme === "dark" ? styles.darkLogoutMenuItem : ""}`}>
           <LogoutOutlined className={styles.menuItemIcon} />
@@ -171,7 +180,8 @@ const NavBar = ({ Comp, titleLines = [], menuItems = [] }) => {
               <b></b>
             ) : (
               <>
-                Organization ID: <b>{authData?.orgId || "N/A"}</b>
+                Organization ID: <b>{authData?.orgId || "N/A"}</b><br/>
+                ({authData?.orgName || "N/A"})
               </>
             )}
           </div>
