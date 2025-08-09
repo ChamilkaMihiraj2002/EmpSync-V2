@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, Table, Tabs, Button, Select, Spin, message } from "antd";
 import { BarChart3, FileText, Users, Download } from "lucide-react";
 import styles from "./Report.module.css";
 import { useAuth } from "../../../../contexts/AuthContext.jsx";
-import * as XLSX from "xlsx";
+import { utils as XLSXUtils, write as XLSXWrite } from "xlsx";
 import { saveAs } from "file-saver";
 import axios from "axios";
 
@@ -1375,12 +1375,12 @@ const Report = () => {
 
     try {
       // Create worksheet and workbook
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, worksheetName);
+      const worksheet = XLSXUtils.json_to_sheet(exportData);
+      const workbook = XLSXUtils.book_new();
+      XLSXUtils.book_append_sheet(workbook, worksheet, worksheetName);
 
       // Generate Excel file and trigger download
-      const excelBuffer = XLSX.write(workbook, {
+      const excelBuffer = XLSXWrite(workbook, {
         bookType: "xlsx",
         type: "array",
       });

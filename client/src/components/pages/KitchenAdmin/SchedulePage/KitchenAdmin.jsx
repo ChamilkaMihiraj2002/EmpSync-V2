@@ -1,9 +1,8 @@
-import React from "react";
+
 import {
   faUsers,
   faUserPlus,
-  faFileInvoice,
-  faDollarSign,
+
   faFingerprint,
   faCalendar,
   faChartLine,
@@ -16,14 +15,11 @@ import Menu from "../../../organisms/Kitchen/Schedule/Calendar.jsx";
 import NotificationPanel from "../../../organisms/Kitchen/NotificationPanel/NotificationPanel.jsx";
 import { useNotifications } from "../../../../contexts/NotificationsContext.jsx";
 import { useAuth } from "../../../../contexts/AuthContext.jsx";
-import styles from "../../../organisms/Kitchen/NotificationPanel/NotificationPanel.module.css";
 
 const AnalysisDashboard = () => {
   // Get and parse authData from localStorage
   const rawAuthData = localStorage.getItem("authData");
-  const parsedAuthData = rawAuthData ? JSON.parse(rawAuthData) : null;
   const { authData } = useAuth();
-  const { getUnreadCount, toggleNotifications } = useNotifications();
   const { logout } = useAuth();
 
   // Safely get permission actions

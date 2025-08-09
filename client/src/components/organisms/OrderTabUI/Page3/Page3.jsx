@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import{ useState, useEffect, useRef } from "react";
 import {
   Button,
   Card,
@@ -16,7 +16,7 @@ import { CheckCircleOutlined, CloseOutlined, LogoutOutlined } from "@ant-design/
 import { motion } from "framer-motion";
 import styles from "./Page3.module.css";
 import { IoClose } from "react-icons/io5";
-import { MdLanguage, MdTranslate } from "react-icons/md";
+import {  MdTranslate } from "react-icons/md";
 import { RiAiGenerate } from "react-icons/ri";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Spin } from "antd";

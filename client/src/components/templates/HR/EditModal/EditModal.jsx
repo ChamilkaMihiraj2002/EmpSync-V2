@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import {  useState, useEffect } from "react";
 import {
   Tabs,
   Form,
@@ -14,8 +14,6 @@ import Loading from "../../../atoms/loading/loading";
 import dayjs from "dayjs";
 import { LuSave } from "react-icons/lu";
 import axios from "axios";
-import Gbutton from "../../../atoms/button/Button";
-import { RiFingerprintLine } from "react-icons/ri";
 import { usePopup } from "../../../../contexts/PopupContext";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { useTheme } from "../../../../contexts/ThemeContext";

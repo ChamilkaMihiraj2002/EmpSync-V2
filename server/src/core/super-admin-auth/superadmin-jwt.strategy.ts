@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
-import * as dotenv from 'dotenv';
-dotenv.config();
+
 
 @Injectable()
 export class SuperAdminJwtStrategy extends PassportStrategy(Strategy, 'superadmin-jwt') {

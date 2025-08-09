@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { DatePicker, Form, Space, Input, Select, InputNumber } from "antd";
 import styles from "./Register.module.css";
 import { IoIosArrowBack } from "react-icons/io";
 import Loading from "../../../atoms/loading/loading.jsx";
 import ImportModal from "../../../templates/HR/ImportModal/ImportModal.jsx";
 import { useNavigate } from "react-router-dom";
-import moment from "moment";
+import dayjs from "dayjs";
 import { AiOutlineCaretRight } from "react-icons/ai";
 import { useAuth } from "../../../../contexts/AuthContext.jsx";
 import { Modal } from "antd";
@@ -408,7 +408,7 @@ const Register = () => {
                 >
                   <DatePicker
                     onChange={(date) =>
-                      setDob(moment(date).format("YYYY-MM-DD"))
+                      setDob(dayjs(date).format("YYYY-MM-DD"))
                     }
                     placeholder="Select Birth Date"
                     style={{ width: "100%" }}

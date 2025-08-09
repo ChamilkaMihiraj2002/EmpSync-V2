@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { message } from 'antd';
 

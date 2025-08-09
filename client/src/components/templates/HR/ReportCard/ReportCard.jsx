@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useState } from "react";
 import styles from "./ReortCard.module.css";
 import { HiEye } from "react-icons/hi2";
 import { HiDownload } from "react-icons/hi";

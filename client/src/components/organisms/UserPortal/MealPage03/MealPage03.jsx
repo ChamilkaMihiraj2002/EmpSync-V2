@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import  { useState, useEffect, useRef } from "react";
 import { 
   Button, 
   Card, 
@@ -9,12 +9,9 @@ import {
   Typography, 
   Layout, 
   Alert, 
-  Space, 
+
   Modal, 
   Select,
-  Divider,
-  Input,
-  Tooltip
 } from "antd";
 import { 
   CheckCircleOutlined, 
@@ -23,11 +20,8 @@ import {
   ShoppingCartOutlined,
   PlusOutlined,
   MinusOutlined,
-  SearchOutlined,
-  FilterOutlined
 } from "@ant-design/icons";
 import { IoClose } from "react-icons/io5";
-import { MdLanguage } from "react-icons/md";
 import { RiAiGenerate } from "react-icons/ri";
 import { Spin } from "antd";
 import { motion } from "framer-motion";

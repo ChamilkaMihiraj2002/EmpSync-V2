@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { ReloadOutlined, EyeOutlined, DeleteOutlined } from "@ant-design/icons";
 import Loading from "../../../atoms/loading/loading.jsx";
 import { Pie } from '@ant-design/plots';

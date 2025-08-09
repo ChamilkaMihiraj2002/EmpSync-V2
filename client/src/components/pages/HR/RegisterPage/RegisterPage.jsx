@@ -1,9 +1,6 @@
-import React from "react";
 import {
   faUsers,
   faUserPlus,
-  faFileInvoice,
-  faDollarSign,
   faFingerprint,
   faCalendar,
   faChartLine,

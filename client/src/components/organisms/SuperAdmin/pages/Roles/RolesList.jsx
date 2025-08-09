@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Button, Space, Tag, Modal, Form, Input, message, Select } from 'antd';
+import  React, { useEffect, useState } from 'react';
+import { Table, Button, Space, Modal, Form, Input, message, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '../../../../../contexts/AuthContext.jsx';
 import styles from './RolesList.module.css';
@@ -404,6 +404,7 @@ const handleDelete = (id, email) => {
             <Select placeholder="Select Role" dropdownClassName="role-dropdown-dark">
               <Select.Option value="HR_ADMIN">Human Resource Manager</Select.Option>
               <Select.Option value="KITCHEN_ADMIN">Kitchen Administrator</Select.Option>
+              <Select.Option value="KITCHEN_STAFF">Kitchen Staff</Select.Option>
             </Select>
           </Form.Item>
           

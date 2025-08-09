@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Card } from 'antd';
+import  { useEffect, useState } from 'react';
+import { Typography } from 'antd';
 import styles from './DateAndTime.module.css';
 
 // DateAndTime component to display the current date and time

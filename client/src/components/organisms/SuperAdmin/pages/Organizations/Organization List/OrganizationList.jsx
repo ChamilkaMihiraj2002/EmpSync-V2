@@ -1,4 +1,4 @@
-import { Button, Input, List, Avatar, Row, Col, Space } from 'antd';
+import { Button, Input, List, Avatar, Space } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useState, useMemo } from 'react';
 import styles from './OrganizationList.module.css';

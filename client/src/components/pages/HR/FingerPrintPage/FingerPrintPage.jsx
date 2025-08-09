@@ -1,9 +1,6 @@
-import React from "react";
 import {
   faUsers,
   faUserPlus,
-  faFileInvoice,
-  faDollarSign,
   faFingerprint,
   faCalendar,
   faChartLine,
@@ -12,7 +9,6 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NavBar from "../../../organisms/NavBar/NavBar.jsx";
 import FingerPrintsContent from "../../../organisms/HR/FingerPrints/FingerPrints.jsx";
-import FingerPrints from '../../../organisms/HR/FingerPrints/FingerPrints.jsx';
 import { useAuth } from "../../../../contexts/AuthContext.jsx"; 
 
 const FingerPrintPage = () => {
