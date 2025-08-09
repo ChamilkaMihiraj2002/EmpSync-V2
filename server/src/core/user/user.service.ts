@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
-  async regeneratePasskey(id: string) {
+  async regeneratePasskey(id: string, adminId?: string) {
     try {
       // Generate a unique 6-digit passkey
       let unique = false;
@@ -23,9 +23,24 @@ export class UserService {
       if (!user) {
         throw new HttpException('User Not found', HttpStatus.NOT_FOUND);
       }
+
+      // Get admin name if adminId is provided
+      let adminName = null;
+      if (adminId) {
+        const admin = await this.databaseService.user.findUnique({
+          where: { id: adminId },
+          select: { name: true },
+        });
+        adminName = admin?.name || 'Unknown Admin';
+      }
+
       await this.databaseService.user.update({
         where: { id },
-        data: { passkey },
+        data: {
+          passkey,
+          passkeyRegeneratedBy: adminName,
+          passkeyRegeneratedAt: new Date(),
+        },
       });
       return passkey;
     } catch (err) {
@@ -60,7 +75,7 @@ export class UserService {
     } catch (err) {
       if (err.code === 'P2002') {
         throw new HttpException(
-          `Id or Email Already Registered`,
+          `Employee Number or Email Already Registered`,
           HttpStatus.CONFLICT,
         );
       }
@@ -70,12 +85,20 @@ export class UserService {
 
   async findAll(search?: string, role?: string, orgId?: string) {
     try {
+      const where: any = {
+        role: role || undefined,
+        organizationId: orgId || undefined,
+      };
+
+      if (search) {
+        where.OR = [
+          { name: { contains: search, mode: 'insensitive' } },
+          { empNo: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
       const users = await this.databaseService.user.findMany({
-        where: {
-          name: search ? { contains: search, mode: 'insensitive' } : undefined,
-          role: role || undefined,
-          organizationId: orgId || undefined,
-        },
+        where,
       });
       if (users) {
         return users;
@@ -92,6 +115,14 @@ export class UserService {
       const user = await this.databaseService.user.findUnique({
         where: {
           id,
+        },
+        include: {
+          organization: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       });
       if (user) {
@@ -138,6 +169,12 @@ export class UserService {
         throw new HttpException('User Not found', HttpStatus.NOT_FOUND);
       }
     } catch (err) {
+      if (err.code === 'P2002') {
+        throw new HttpException(
+          `Employee Number Already Exists`,
+          HttpStatus.CONFLICT,
+        );
+      }
       throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

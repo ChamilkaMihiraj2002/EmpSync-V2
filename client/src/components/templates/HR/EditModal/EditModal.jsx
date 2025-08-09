@@ -1,4 +1,4 @@
-import {  useState, useEffect } from "react";
+import { React, useState, useEffect } from "react";
 import {
   Tabs,
   Form,
@@ -38,7 +38,6 @@ const formItemLayout = {
 };
 
 const EditModal = ({ empId, handleCancel, fetchEmployee }) => {
-  const [customRole, setCustomRole] = useState("");
   const [form] = Form.useForm();
   const { success, error } = usePopup();
   const { authData } = useAuth();
@@ -93,7 +92,21 @@ const EditModal = ({ empId, handleCancel, fetchEmployee }) => {
       const token = authData?.accessToken;
       await form.validateFields();
       setLoading(true);
-      await axios.put(`${urL}/user/${empId}`, currentEmployee, {
+      const {
+        organizationId,
+        organization,
+        createdAt,
+        payrolls,
+        permissions,
+        userPermissions,
+        individualSalaryAdjustments,
+        passkey,
+        passkeyRegeneratedBy,
+        passkeyRegeneratedAt,
+        ...updateData
+      } = currentEmployee;
+
+      await axios.put(`${urL}/user/${empId}`, updateData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -104,12 +117,13 @@ const EditModal = ({ empId, handleCancel, fetchEmployee }) => {
     } catch (err) {
       console.log(err);
 
-      if (err?.errorFields) {
-        // Extract all error messages into one string
+      // Show backend error message if available
+      if (err.response?.data?.message) {
+        error(err.response.data.message);
+      } else if (err?.errorFields) {
         const allMessages = err.errorFields
           .map((field) => field.errors.join(", "))
           .join(" | ");
-
         error(allMessages);
       } else {
         error(err?.message || "Update failed");
@@ -304,100 +318,41 @@ const EditModal = ({ empId, handleCancel, fetchEmployee }) => {
                   <>
                     <div className={styles.con}>
                       <Form.Item name="empNo" label="Employee No">
-                        <Input disabled />
-                      </Form.Item>
-                      <Form.Item name="supId" label="Supervisor's ID">
                         <Input
                           onChange={(e) =>
                             setCurrentEmployee({
                               ...currentEmployee,
-                              supId: e.target.value,
+                              empNo: e.target.value,
                             })
                           }
-                          placeholder="Enter Supervisor ID (If Available)"
+                          placeholder="Enter Employee Number"
                         />
                       </Form.Item>
+
                       <Form.Item
+                        name="role"
+                        label="Job Role"
                         rules={[
                           {
-                            message: "Please Enter ID!",
+                            required: true,
+                            message: "Please enter a role!",
                           },
                         ]}
-                        label="Job Role"
-                        name="roleHold"
                       >
-                        <Space.Compact className={styles.select}>
-                          <Form.Item
-                            noStyle
-                            name="role"
-                            style={{ flex: "1" }}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Please select a role!",
-                              },
-                            ]}
-                          >
-                            <Select
-                              onChange={(value) => {
-                                setCurrentEmployee({
-                                  ...currentEmployee,
-                                  role: value,
-                                });
-                                setCustomRole(value);
-                              }}
-                              style={{ width: "100%" }}
-                              placeholder="Select Role"
-                            >
-                              <Select.Option value="HR_ADMIN">
-                                Human Resources Manager
-                              </Select.Option>
-                              <Select.Option value="KITCHEN_ADMIN">
-                                Kitchen Administrator
-                              </Select.Option>
-                              <Select.Option value="KITCHEN_STAFF">
-                                Kitchen Staff
-                              </Select.Option>
-                              <Select.Option value="INVENTORY_ADMIN">
-                                Inventory Manager
-                              </Select.Option>
-                              <Select.Option value="Other">Other</Select.Option>
-                            </Select>
-                          </Form.Item>
-
-                          <Form.Item
-                            noStyle
-                            name="customRole"
-                            style={{ flex: "2" }}
-                            rules={[
-                              ({ getFieldValue }) => ({
-                                validator(_, value) {
-                                  if (
-                                    getFieldValue("role") === "Other" &&
-                                    !value
-                                  ) {
-                                    return Promise.reject(
-                                      "Please enter custom role!"
-                                    );
-                                  }
-                                  return Promise.resolve();
-                                },
-                              }),
-                            ]}
-                          >
-                            <Input
-                              style={{ width: "100%" }}
-                              onChange={(e) => {
-                                setCurrentEmployee({
-                                  ...currentEmployee,
-                                  role: e.target.value,
-                                });
-                              }}
-                              placeholder="If Other, Enter Job Role"
-                              disabled={customRole !== "Other"}
-                            />
-                          </Form.Item>
-                        </Space.Compact>
+                        <Input
+                          disabled={
+                            currentEmployee.role === "HR_ADMIN" ||
+                            currentEmployee.role === "KITCHEN_ADMIN" ||
+                            currentEmployee.role === "KITCHEN_STAFF"
+                          }
+                          placeholder="Enter Job Role"
+                          onChange={(e) =>
+                            setCurrentEmployee({
+                              ...currentEmployee,
+                              role: e.target.value,
+                            })
+                          }
+                        />
                       </Form.Item>
 
                       <Form.Item
@@ -459,38 +414,6 @@ const EditModal = ({ empId, handleCancel, fetchEmployee }) => {
                           <Select.Option value="English">English</Select.Option>
                           <Select.Option value="Tamil">Tamil</Select.Option>
                         </Select>
-                      </Form.Item>
-                      <Form.Item name="height" label="Height">
-                        <InputNumber
-                          maxLength={3}
-                          min={0}
-                          style={{ width: "100%" }}
-                          formatter={(value) => `${value} cm`}
-                          parser={(value) => value.replace(" cm", "")}
-                          onChange={(e) =>
-                            setCurrentEmployee({
-                              ...currentEmployee,
-                              height: e.target.value,
-                            })
-                          }
-                          placeholder="Enter Height (cm)"
-                        />
-                      </Form.Item>
-                      <Form.Item name="weight" label="Weight">
-                        <InputNumber
-                          maxLength={3}
-                          min={0}
-                          style={{ width: "100%" }}
-                          formatter={(value) => `${value} Kg`}
-                          parser={(value) => value.replace(" Kg", "")}
-                          onChange={(e) =>
-                            setCurrentEmployee({
-                              ...currentEmployee,
-                              weight: e.target.value,
-                            })
-                          }
-                          placeholder="Enter Weight (Kg)"
-                        />
                       </Form.Item>
                     </div>
                     <div className={styles.subBtn}>
