@@ -308,9 +308,9 @@ class ThermalPrinterService {
     const cleanData = String(data).replace(/[^\w]/g, '').toUpperCase();
     console.log('📝 Cleaned barcode data:', cleanData);
     
-    // Configurable size options (defaults to large, readable size)
-    const height = options.height || 80;  // Default: 80 dots (good for scanning)
-    const width = options.width || 4;     // Default: 4x width (good visibility)
+    // Configurable size options (defaults to extra large, highly scannable size)
+    const height = options.height || 120;  // Default: 120 dots (extra large for easy scanning)
+    const width = options.width || 5;      // Default: 5x width (maximum visibility)
     
     // Create the simplest possible CODE128 barcode command sequence
     const commands = [];
@@ -353,7 +353,14 @@ class ThermalPrinterService {
    * Generate extra large barcode for difficult scanning conditions
    */
   generateExtraLargeBarcode(data) {
-    return this.generateWorkingBarcode(data, { height: 120, width: 5 });
+    return this.generateWorkingBarcode(data, { height: 150, width: 6 });
+  }
+
+  /**
+   * Generate ultra large barcode for maximum scanning capability
+   */
+  generateUltraLargeBarcode(data) {
+    return this.generateWorkingBarcode(data, { height: 200, width: 6 });
   }
 
   /**
@@ -575,7 +582,7 @@ class ThermalPrinterService {
       receiptData.push(...commands.alignCenter);
       receiptData.push(...commands.doubleWidth);
       receiptData.push(...commands.bold);
-      receiptData.push(...this.textToBytes('BizSolution'));
+      receiptData.push(...this.textToBytes('Biz Solution'));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.normalSize);
       receiptData.push(...commands.boldOff);
@@ -632,12 +639,12 @@ class ThermalPrinterService {
 
       // Barcode section
       receiptData.push(...commands.alignCenter);
-      receiptData.push(...this.textToBytes('Order Barcode:'));
+      // receiptData.push(...this.textToBytes('Order Barcode:'));
       receiptData.push(...commands.crlf);
 
       // Generate and add barcode - TEST FIRST, THEN ADD TO RECEIPT
       receiptData.push(...commands.alignCenter);
-      receiptData.push(...this.textToBytes('Order Barcode:'));
+      // receiptData.push(...this.textToBytes('Order Barcode:'));
       receiptData.push(...commands.crlf);
 
       console.log('🔧 STEP 1: TESTING BARCODE GENERATION FOR ORDER:', orderData.orderId);
@@ -655,7 +662,7 @@ class ThermalPrinterService {
         console.log('✅ STEP 2 PASSED: BARCODE ADDED TO RECEIPT DATA');
         
         // STEP 3: Add verification text
-        receiptData.push(...this.textToBytes(`Barcode: ${orderData.orderId}`));
+        // receiptData.push(...this.textToBytes(`Barcode: ${orderData.orderId}`));
         receiptData.push(...commands.crlf);
         console.log('✅ STEP 3 PASSED: VERIFICATION TEXT ADDED');
         
