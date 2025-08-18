@@ -384,7 +384,7 @@ const Page3 = ({
     }
   };
 
-  const printOrderReceipt = async (orderResponse, orderItems) => {
+  const printOrderReceipt = async (orderResponse, orderItems, mealTime, orderDate) => {
     if (!thermalPrinter) {
       console.warn('Thermal printer not available');
       return;
@@ -404,10 +404,10 @@ const Page3 = ({
       // Generate order ID from response or create one
       const orderId = orderResponse?.id || orderResponse?.orderId || `ORD${Date.now()}`;
       
-      // Get meal type name
-      const mealTypeName = availableMealTimes.find(m => m.id === selectedMealTime)?.name || 'Unknown';
+      // Get meal type name - use the specific mealTime passed as parameter
+      const mealTypeName = availableMealTimes.find(m => m.id === mealTime)?.name || 'Unknown';
       
-      // Prepare order items for printing
+      // Prepare order items for printing (only items for this specific order)
       const printItems = orderItems.map(item => {
         const meal = allMeals.find(m => m.id === item.mealId);
         return {
@@ -417,32 +417,46 @@ const Page3 = ({
         };
       });
 
-      // Calculate total price
+      // Calculate total price for this specific order
       const totalPrice = printItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+      // Format the order date from the database response
+      const formattedOrderDate = orderDate ? 
+        new Date(orderDate).toLocaleDateString('en-IN') : 
+        new Date().toLocaleDateString('en-IN');
+
+      // Current system time for receipt printing
+      const currentPrintTime = new Date().toLocaleTimeString('en-IN');
 
       // Prepare order data for printing
       const orderData = {
         orderId: orderId,
         username: username?.name || 'Guest',
-        orderDate: selectedDate === "today" 
-          ? new Date().toLocaleDateString('en-IN')
-          : new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleDateString('en-IN'),
-        orderTime: new Date().toLocaleTimeString('en-IN'),
+        orderDate: formattedOrderDate, // Use the actual order date from database
+        orderTime: currentPrintTime,   // Use current system time for receipt
         mealType: text[mealTypeName] || mealTypeName,
         items: printItems,
         totalPrice: totalPrice
       };
 
-      console.log('Printing order receipt:', orderData);
+      console.log('Printing individual order receipt:', {
+        orderId,
+        mealType: mealTypeName,
+        orderDate: formattedOrderDate,
+        printTime: currentPrintTime,
+        itemCount: printItems.length,
+        totalPrice
+      });
       
       // Print the receipt
       await thermalPrinter.printOrder(orderData);
       
       notification.success({
         message: 'Receipt Printed',
-        description: `Order receipt (${orderId}) printed successfully`,
+        description: `Order receipt (${orderId}) for ${text[mealTypeName] || mealTypeName} printed successfully`,
         placement: 'topRight',
         icon: <PrinterOutlined style={{ color: '#52c41a' }} />,
+        duration: 3,
       });
 
     } catch (error) {
@@ -466,17 +480,21 @@ const Page3 = ({
           mealTime: item.mealTime,
           meals: {},
           totalPrice: 0,
+          orderItems: [], // Store order items for this specific order
         };
       }
       acc[key].meals[item.mealId] =
         (acc[key].meals[item.mealId] || 0) + item.count;
       const meal = allMeals.find((meal) => meal.id === item.mealId);
       acc[key].totalPrice += meal ? meal.price * item.count : 0;
+      
+      // Add this item to the specific order's items
+      acc[key].orderItems.push(item);
       return acc;
     }, {});
 
     try {
-      let lastOrderResponse = null;
+      const orderResponses = []; // Store all order responses for printing receipts
       
       for (const key in groupedOrders) {
         const { date, mealTime, meals, totalPrice } = groupedOrders[key];
@@ -526,16 +544,54 @@ const Page3 = ({
           throw new Error(`Failed to place order: ${response.statusText}`);
         }
         
-        lastOrderResponse = response.data;
+        // Store order response with its corresponding items
+        orderResponses.push({
+          orderResponse: response.data,
+          orderItems: groupedOrders[key].orderItems,
+          mealTime: mealTime,
+          orderDate: orderDate
+        });
       }
 
       setShowSuccess(true);
       
-      // Print receipt after successful order placement
-      if (lastOrderResponse && thermalPrinter) {
-        // Add small delay to ensure order is processed
-        setTimeout(() => {
-          printOrderReceipt(lastOrderResponse, orderItems);
+      // Print separate receipts for each order
+      if (orderResponses.length > 0 && thermalPrinter) {
+        // Add small delay to ensure orders are processed
+        setTimeout(async () => {
+          try {
+            for (let i = 0; i < orderResponses.length; i++) {
+              const { orderResponse, orderItems: specificOrderItems, mealTime, orderDate } = orderResponses[i];
+              
+              console.log(`Printing receipt ${i + 1} of ${orderResponses.length}:`, {
+                orderId: orderResponse?.id || orderResponse?.orderId,
+                mealTime,
+                itemCount: specificOrderItems.length
+              });
+              
+              // Print receipt for this specific order
+              await printOrderReceipt(orderResponse, specificOrderItems, mealTime, orderDate);
+              
+              // Add delay between receipts to prevent printer buffer overflow
+              if (i < orderResponses.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+              }
+            }
+            
+            notification.success({
+              message: 'All Receipts Printed',
+              description: `Successfully printed ${orderResponses.length} receipt(s)`,
+              placement: 'topRight',
+              icon: <PrinterOutlined style={{ color: '#52c41a' }} />,
+            });
+          } catch (printError) {
+            console.error('Failed to print receipts:', printError);
+            notification.error({
+              message: 'Print Failed',
+              description: `Failed to print some receipts: ${printError.message}`,
+              placement: 'topRight',
+            });
+          }
         }, 500);
       }
       
