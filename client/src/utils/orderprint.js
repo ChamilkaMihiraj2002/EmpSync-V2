@@ -296,21 +296,30 @@ class ThermalPrinterService {
       throw new Error(`Barcode generation failed for order ${orderId}: ${error.message}`);
     }
   }
-  generateWorkingBarcode(data) {
+  /**
+   * Generate working barcode with customizable size
+   * @param {string} data - The data to encode
+   * @param {object} options - Size options { height: number, width: number }
+   */
+  generateWorkingBarcode(data, options = {}) {
     console.log('🔧 Generating guaranteed working barcode for:', data);
     
     // Clean and prepare data
     const cleanData = String(data).replace(/[^\w]/g, '').toUpperCase();
     console.log('📝 Cleaned barcode data:', cleanData);
     
+    // Configurable size options (defaults to large, readable size)
+    const height = options.height || 80;  // Default: 80 dots (good for scanning)
+    const width = options.width || 4;     // Default: 4x width (good visibility)
+    
     // Create the simplest possible CODE128 barcode command sequence
     const commands = [];
     
-    // Set barcode height (conservative 40 dots)
-    commands.push(0x1D, 0x68, 40);
+    // Set barcode height
+    commands.push(0x1D, 0x68, Math.min(Math.max(height, 20), 255)); // Clamp between 20-255
     
-    // Set barcode width (moderate width = 3)
-    commands.push(0x1D, 0x77, 3);
+    // Set barcode width
+    commands.push(0x1D, 0x77, Math.min(Math.max(width, 1), 6)); // Clamp between 1-6
     
     // Set HRI character position (below barcode = 2)
     commands.push(0x1D, 0x48, 2);
@@ -329,13 +338,22 @@ class ThermalPrinterService {
       commands.push(cleanData.charCodeAt(i));
     }
     
-    console.log('✅ Generated barcode commands:', {
+    console.log('✅ Generated LARGER barcode commands:', {
       dataLength: cleanData.length,
       totalCommands: commands.length,
+      height: `${height} dots`,
+      width: `${width}x`,
       previewCommands: commands.slice(0, 15).map(x => '0x' + x.toString(16)).join(' ')
     });
     
     return new Uint8Array(commands);
+  }
+
+  /**
+   * Generate extra large barcode for difficult scanning conditions
+   */
+  generateExtraLargeBarcode(data) {
+    return this.generateWorkingBarcode(data, { height: 120, width: 5 });
   }
 
   /**

@@ -1139,8 +1139,8 @@ const Page3 = ({
                                     0x1B, 0x40,        // Initialize printer
                                     0x1B, 0x61, 0x01,  // Center align
                                     ...new TextEncoder().encode('DIRECT BARCODE TEST\n'),
-                                    0x1D, 0x68, 50,    // Set barcode height to 50
-                                    0x1D, 0x77, 3,     // Set barcode width to 3
+                                    0x1D, 0x68, 80,    // Set barcode height to 80 (larger)
+                                    0x1D, 0x77, 4,     // Set barcode width to 4 (larger)
                                     0x1D, 0x48, 2,     // Print HRI below barcode
                                     0x1D, 0x6B, 73,    // CODE128 barcode command
                                     6,                  // Data length
@@ -1175,6 +1175,62 @@ const Page3 = ({
                               type="primary"
                             >
                               Direct Test
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  
+                                  if (!thermalPrinter?.thermalPrinter?.isConnected) {
+                                    notification.error({
+                                      message: 'Printer Not Connected',
+                                      description: 'Please connect the thermal printer first',
+                                      placement: 'topRight',
+                                    });
+                                    return;
+                                  }
+                                  
+                                  console.log('🔧 EXTRA LARGE BARCODE TEST...');
+                                  
+                                  // Test extra large barcode
+                                  const commands = thermalPrinter.thermalPrinter.generateESCPOSCommands();
+                                  const testData = [
+                                    ...commands.init,
+                                    ...commands.alignCenter,
+                                    ...thermalPrinter.thermalPrinter.textToBytes('EXTRA LARGE BARCODE TEST'),
+                                    ...commands.crlf,
+                                    ...commands.crlf,
+                                    ...thermalPrinter.thermalPrinter.generateExtraLargeBarcode('XLTEST'),
+                                    ...commands.crlf,
+                                    ...commands.crlf,
+                                    ...commands.paperFeed
+                                  ];
+                                  
+                                  await thermalPrinter.thermalPrinter.sendData(new Uint8Array(testData));
+                                  
+                                  notification.success({
+                                    message: 'Extra Large Barcode Test',
+                                    description: 'Extra large barcode sent (120 height, 5x width)',
+                                    placement: 'topRight',
+                                  });
+                                } catch (error) {
+                                  console.error('❌ Extra large barcode test failed:', error);
+                                  notification.error({
+                                    message: 'Extra Large Test Failed',
+                                    description: error.message,
+                                    placement: 'topRight',
+                                  });
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              type="dashed"
+                            >
+                              XL Barcode
                             </Button>
                           </>
                         )}
