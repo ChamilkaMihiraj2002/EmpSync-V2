@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermal Printer Device Scanner</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .scan-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .scan-button:hover {
+            transform: translateY(-2px);
+        }
+        .scan-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .device-list {
+            margin-top: 20px;
+        }
+        .device-item {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+        .device-item.thermal-printer {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .device-item.unknown {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+        .device-name {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
+        .device-id {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .device-type {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        .thermal-printer-badge {
+            background: #28a745;
+            color: white;
+        }
+        .unknown-badge {
+            background: #ffc107;
+            color: #333;
+        }
+        .other-badge {
+            background: #6c757d;
+            color: white;
+        }
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .warning {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .log {
+            background: #f1f3f4;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖨️ Thermal Printer Device Scanner</h1>
+            <p>This tool helps you identify thermal printers among your Bluetooth devices</p>
+        </div>
+
+        <div class="instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Ensure your thermal printer is powered ON</li>
+                <li>Put your thermal printer in pairing/discoverable mode</li>
+                <li>Click the "Scan for Devices" button below</li>
+                <li>Look for devices marked as "Likely Thermal Printer"</li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <strong>Note:</strong> This tool requires a modern browser with Web Bluetooth support (Chrome, Edge, etc.) and HTTPS connection.
+        </div>
+
+        <button id="scanButton" class="scan-button">🔍 Scan for Bluetooth Devices</button>
+
+        <div id="deviceList" class="device-list"></div>
+        <div id="log" class="log" style="display: none;"></div>
+    </div>
+
+    <script>
+        const scanButton = document.getElementById('scanButton');
+        const deviceList = document.getElementById('deviceList');
+        const log = document.getElementById('log');
+
+        // Thermal printer keywords for identification
+        const thermalPrinterKeywords = [
+            'thermal', 'receipt', 'pos', 'printer', 'epson', 'star', 'citizen',
+            'zebra', 'bixolon', 'munbyn', 'rongta', 'xprinter', 'hprt', 'goojprt',
+            'milestone', 'bluetooth printer', 'bt printer', 'mobile printer',
+            'label', 'barcode'
+        ];
+
+        function logMessage(message) {
+            console.log(message);
+            log.style.display = 'block';
+            log.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function identifyDevice(deviceName) {
+            if (!deviceName) return 'unknown';
+            
+            const nameLower = deviceName.toLowerCase();
+            const isThermalPrinter = thermalPrinterKeywords.some(keyword => 
+                nameLower.includes(keyword)
+            );
+            
+            return isThermalPrinter ? 'thermal-printer' : 'other';
+        }
+
+        function createDeviceElement(device) {
+            const deviceType = identifyDevice(device.name);
+            const deviceElement = document.createElement('div');
+            deviceElement.className = `device-item ${deviceType}`;
+            
+            let badgeClass, badgeText;
+            switch (deviceType) {
+                case 'thermal-printer':
+                    badgeClass = 'thermal-printer-badge';
+                    badgeText = '✅ Likely Thermal Printer';
+                    break;
+                case 'unknown':
+                    badgeClass = 'unknown-badge';
+                    badgeText = '❓ Unknown Device';
+                    break;
+                default:
+                    badgeClass = 'other-badge';
+                    badgeText = '📱 Other Device';
+            }
+            
+            deviceElement.innerHTML = `
+                <div class="device-name">${device.name || 'Unnamed Device'}</div>
+                <div class="device-id">ID: ${device.id || 'Unknown'}</div>
+                <div class="device-type ${badgeClass}">${badgeText}</div>
+            `;
+            
+            return deviceElement;
+        }
+
+        async function scanForDevices() {
+            if (!navigator.bluetooth) {
+                alert('Web Bluetooth is not supported in this browser. Please use Chrome, Edge, or another Chromium-based browser.');
+                return;
+            }
+
+            scanButton.disabled = true;
+            scanButton.textContent = '🔍 Scanning...';
+            deviceList.innerHTML = '';
+            
+            logMessage('Starting Bluetooth device scan...');
+
+            try {
+                // Method 1: Try scanning with name filters
+                logMessage('Attempting scan with thermal printer name filters...');
+                
+                const nameFilters = thermalPrinterKeywords.map(keyword => ({ 
+                    namePrefix: keyword.charAt(0).toUpperCase() + keyword.slice(1) 
+                }));
+
+                let device;
+                try {
+                    device = await navigator.bluetooth.requestDevice({
+                        filters: nameFilters,
+                        optionalServices: [
+                            '000018f0-0000-1000-8000-00805f9b34fb',
+                            '0000180f-0000-1000-8000-00805f9b34fb',
+                            '00001101-0000-1000-8000-00805f9b34fb',
+                            '0000180a-0000-1000-8000-00805f9b34fb'
+                        ]
+                    });
+                    logMessage(`Found device with name filter: ${device.name}`);
+                } catch (filterError) {
+                    logMessage('Name filter scan failed, trying service-based scan...');
+                    
+                    // Method 2: Try with service filters
+                    try {
+                        device = await navigator.bluetooth.requestDevice({
+                            filters: [
+                                { services: ['00001101-0000-1000-8000-00805f9b34fb'] },
+                                { services: ['000018f0-0000-1000-8000-00805f9b34fb'] }
+                            ],
+                            optionalServices: [
+                                '000018f0-0000-1000-8000-00805f9b34fb',
+                                '0000180f-0000-1000-8000-00805f9b34fb',
+                                '00001101-0000-1000-8000-00805f9b34fb',
+                                '0000180a-0000-1000-8000-00805f9b34fb'
+                            ]
+                        });
+                        logMessage(`Found device with service filter: ${device.name}`);
+                    } catch (serviceError) {
+                        logMessage('Service filter scan failed, using acceptAllDevices...');
+                        
+                        // Method 3: Show all devices (last resort)
+                        device = await navigator.bluetooth.requestDevice({
+                            acceptAllDevices: true,
+                            optionalServices: [
+                                '000018f0-0000-1000-8000-00805f9b34fb',
+                                '0000180f-0000-1000-8000-00805f9b34fb',
+                                '00001101-0000-1000-8000-00805f9b34fb',
+                                '0000180a-0000-1000-8000-00805f9b34fb'
+                            ]
+                        });
+                        logMessage(`Selected device from all devices: ${device.name}`);
+                    }
+                }
+
+                // Display the selected device
+                const deviceElement = createDeviceElement(device);
+                deviceList.appendChild(deviceElement);
+                
+                logMessage(`Device scan completed. Selected: ${device.name || 'Unnamed'}`);
+                
+                // Show connection information
+                const infoElement = document.createElement('div');
+                infoElement.innerHTML = `
+                    <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px; border: 1px solid #28a745;">
+                        <strong>Selected Device Information:</strong><br>
+                        <strong>Name:</strong> ${device.name || 'Unnamed Device'}<br>
+                        <strong>ID:</strong> ${device.id || 'Unknown'}<br>
+                        <strong>Type:</strong> ${identifyDevice(device.name) === 'thermal-printer' ? 'Likely Thermal Printer ✅' : 'Unknown/Other Device ⚠️'}<br>
+                        <br>
+                        <em>You can now use this device name when connecting from the EmpSync ordering system.</em>
+                    </div>
+                `;
+                deviceList.appendChild(infoElement);
+
+            } catch (error) {
+                logMessage(`Scan failed: ${error.message}`);
+                deviceList.innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: #d32f2f;">
+                        <strong>Scan Failed</strong><br>
+                        ${error.message}<br><br>
+                        <em>Please ensure your thermal printer is in pairing mode and try again.</em>
+                    </div>
+                `;
+            } finally {
+                scanButton.disabled = false;
+                scanButton.textContent = '🔍 Scan for Devices';
+            }
+        }
+
+        scanButton.addEventListener('click', scanForDevices);
+
+        // Check Web Bluetooth support on page load
+        if (!navigator.bluetooth) {
+            scanButton.disabled = true;
+            scanButton.textContent = '❌ Web Bluetooth Not Supported';
+            deviceList.innerHTML = `
+                <div style="padding: 20px; text-align: center; color: #d32f2f; background: #ffebee; border-radius: 8px;">
+                    <strong>Web Bluetooth Not Supported</strong><br>
+                    Please use Chrome, Edge, or another Chromium-based browser with Web Bluetooth support.
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
