@@ -8,7 +8,7 @@ const WelcomeSection = () => {
   return (
     <div className="welcome-container">
       <Title level={1} className="welcome-title">
-        Welcome to Helix Food Serving
+        Welcome to Biz Food Serving
       </Title>
       <div className="date-time">
         <DateTime color="#ffffff" />

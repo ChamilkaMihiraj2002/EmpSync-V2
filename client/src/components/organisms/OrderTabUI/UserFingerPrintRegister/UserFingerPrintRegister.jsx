@@ -16,7 +16,7 @@ const UserFingerPrintRegister = () => {
         >
             <div>
                 <h1 className={styles.mainTitle1}>
-                    Welcome to <span>Helix</span> Food Ordering
+                    Welcome to <span>Biz</span> Food Ordering
                 </h1>
                 <h2 className={styles.subHeading}>
                     New User Register on FingerPrint Device

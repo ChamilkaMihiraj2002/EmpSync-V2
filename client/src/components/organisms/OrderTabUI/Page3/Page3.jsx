@@ -11,8 +11,9 @@ import {
   Alert,
   Space,
   Modal,
+  notification,
 } from "antd";
-import { CheckCircleOutlined, CloseOutlined, LogoutOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, CloseOutlined, LogoutOutlined, PrinterOutlined } from "@ant-design/icons";
 import { motion } from "framer-motion";
 import styles from "./Page3.module.css";
 import { IoClose } from "react-icons/io5";
@@ -25,6 +26,7 @@ import { useAuth } from "../../../../contexts/AuthContext.jsx";
 import axios from "axios";
 import DateAndTime from "../DateAndTime/DateAndTime.jsx";
 import { useMealData } from "../../../../contexts/MealDataContext.jsx";
+import OrderReceiptPrinter from "../../../../utils/orderprint.js";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -100,7 +102,25 @@ const Page3 = ({
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [thermalPrinter, setThermalPrinter] = useState(null);
+  const [isPrinterConnected, setIsPrinterConnected] = useState(false);
+  const [printingOrder, setPrintingOrder] = useState(false);
   const text = translations[language];
+
+  // Initialize thermal printer
+  useEffect(() => {
+    const initThermalPrinter = async () => {
+      try {
+        const printer = new OrderReceiptPrinter();
+        setThermalPrinter(printer);
+        console.log('Thermal printer service initialized');
+      } catch (error) {
+        console.error('Failed to initialize thermal printer:', error);
+      }
+    };
+
+    initThermalPrinter();
+  }, []);
 
   // Get organizationId from username prop
   const organizationId = username?.organizationId;
@@ -309,6 +329,148 @@ const Page3 = ({
     }
   };
 
+  const connectThermalPrinter = async () => {
+    if (!thermalPrinter) {
+      notification.error({
+        message: 'Printer Error',
+        description: 'Thermal printer service not initialized',
+        placement: 'topRight',
+      });
+      return false;
+    }
+
+    try {
+      notification.info({
+        message: 'Connecting to Printer',
+        description: 'Please select your thermal printer from the list. Look for names containing "Thermal", "Receipt", "POS", or printer brand names like EPSON, Star, Citizen.',
+        placement: 'topRight',
+        duration: 6,
+      });
+
+      await thermalPrinter.connectPrinter();
+      setIsPrinterConnected(true);
+      
+      notification.success({
+        message: 'Printer Connected',
+        description: `Thermal printer connected successfully. Device: ${thermalPrinter.thermalPrinter.device?.name || 'Unknown'}`,
+        placement: 'topRight',
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to connect thermal printer:', error);
+      setIsPrinterConnected(false);
+      
+      let errorMessage = 'Failed to connect to thermal printer';
+      let errorDescription = error.message || 'Unknown error occurred';
+
+      // Provide specific guidance based on error type
+      if (error.message.includes('not supported')) {
+        errorDescription = 'Web Bluetooth is not supported in this browser. Please use Chrome, Edge, or another Chromium-based browser.';
+      } else if (error.message.includes('cancelled')) {
+        errorDescription = 'Connection was cancelled. Please try again and select a thermal printer.';
+      } else if (error.message.includes('pairing mode')) {
+        errorDescription = 'No thermal printers found. Please ensure your printer is powered on and in pairing mode.';
+      } else if (error.message.includes('No writable characteristic')) {
+        errorDescription = 'The selected device does not support thermal printing. Please select a different device.';
+      }
+
+      notification.error({
+        message: errorMessage,
+        description: errorDescription,
+        placement: 'topRight',
+        duration: 8,
+      });
+      return false;
+    }
+  };
+
+  const printOrderReceipt = async (orderResponse, orderItems, mealTime, orderDate) => {
+    if (!thermalPrinter) {
+      console.warn('Thermal printer not available');
+      return;
+    }
+
+    setPrintingOrder(true);
+    try {
+      // Connect printer if not connected
+      if (!isPrinterConnected) {
+        const connected = await connectThermalPrinter();
+        if (!connected) {
+          setPrintingOrder(false);
+          return;
+        }
+      }
+
+      // Generate order ID from response or create one
+      const orderId = orderResponse?.id || orderResponse?.orderId || `ORD${Date.now()}`;
+      
+      // Get meal type name - use the specific mealTime passed as parameter
+      const mealTypeName = availableMealTimes.find(m => m.id === mealTime)?.name || 'Unknown';
+      
+      // Prepare order items for printing (only items for this specific order)
+      const printItems = orderItems.map(item => {
+        const meal = allMeals.find(m => m.id === item.mealId);
+        return {
+          name: meal ? (meal[`name${language.charAt(0).toUpperCase() + language.slice(1)}`] || meal.nameEnglish || 'Unknown Meal') : 'Unknown Meal',
+          quantity: item.count,
+          price: meal ? meal.price : 0
+        };
+      });
+
+      // Calculate total price for this specific order
+      const totalPrice = printItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+      // Format the order date from the database response
+      const formattedOrderDate = orderDate ? 
+        new Date(orderDate).toLocaleDateString('en-IN') : 
+        new Date().toLocaleDateString('en-IN');
+
+      // Current system time for receipt printing
+      const currentPrintTime = new Date().toLocaleTimeString('en-IN');
+
+      // Prepare order data for printing
+      const orderData = {
+        orderId: orderId,
+        username: username?.name || 'Guest',
+        orderDate: formattedOrderDate, // Use the actual order date from database
+        orderTime: currentPrintTime,   // Use current system time for receipt
+        mealType: text[mealTypeName] || mealTypeName,
+        items: printItems,
+        totalPrice: totalPrice
+      };
+
+      console.log('Printing individual order receipt:', {
+        orderId,
+        mealType: mealTypeName,
+        orderDate: formattedOrderDate,
+        printTime: currentPrintTime,
+        itemCount: printItems.length,
+        totalPrice
+      });
+      
+      // Print the receipt
+      await thermalPrinter.printOrder(orderData);
+      
+      notification.success({
+        message: 'Receipt Printed',
+        description: `Order receipt (${orderId}) for ${text[mealTypeName] || mealTypeName} printed successfully`,
+        placement: 'topRight',
+        icon: <PrinterOutlined style={{ color: '#52c41a' }} />,
+        duration: 3,
+      });
+
+    } catch (error) {
+      console.error('Failed to print order receipt:', error);
+      notification.error({
+        message: 'Print Failed',
+        description: error.message || 'Failed to print order receipt',
+        placement: 'topRight',
+      });
+    } finally {
+      setPrintingOrder(false);
+    }
+  };
+
   const placeOrder = async () => {
     const groupedOrders = orderItems.reduce((acc, item) => {
       const key = `${item.date}-${item.mealTime}`;
@@ -318,16 +480,22 @@ const Page3 = ({
           mealTime: item.mealTime,
           meals: {},
           totalPrice: 0,
+          orderItems: [], // Store order items for this specific order
         };
       }
       acc[key].meals[item.mealId] =
         (acc[key].meals[item.mealId] || 0) + item.count;
       const meal = allMeals.find((meal) => meal.id === item.mealId);
       acc[key].totalPrice += meal ? meal.price * item.count : 0;
+      
+      // Add this item to the specific order's items
+      acc[key].orderItems.push(item);
       return acc;
     }, {});
 
     try {
+      const orderResponses = []; // Store all order responses for printing receipts
+      
       for (const key in groupedOrders) {
         const { date, mealTime, meals, totalPrice } = groupedOrders[key];
         const mealsArray = Object.entries(meals).map(
@@ -375,9 +543,58 @@ const Page3 = ({
           });
           throw new Error(`Failed to place order: ${response.statusText}`);
         }
+        
+        // Store order response with its corresponding items
+        orderResponses.push({
+          orderResponse: response.data,
+          orderItems: groupedOrders[key].orderItems,
+          mealTime: mealTime,
+          orderDate: orderDate
+        });
       }
 
       setShowSuccess(true);
+      
+      // Print separate receipts for each order
+      if (orderResponses.length > 0 && thermalPrinter) {
+        // Add small delay to ensure orders are processed
+        setTimeout(async () => {
+          try {
+            for (let i = 0; i < orderResponses.length; i++) {
+              const { orderResponse, orderItems: specificOrderItems, mealTime, orderDate } = orderResponses[i];
+              
+              console.log(`Printing receipt ${i + 1} of ${orderResponses.length}:`, {
+                orderId: orderResponse?.id || orderResponse?.orderId,
+                mealTime,
+                itemCount: specificOrderItems.length
+              });
+              
+              // Print receipt for this specific order
+              await printOrderReceipt(orderResponse, specificOrderItems, mealTime, orderDate);
+              
+              // Add delay between receipts to prevent printer buffer overflow
+              if (i < orderResponses.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+              }
+            }
+            
+            notification.success({
+              message: 'All Receipts Printed',
+              description: `Successfully printed ${orderResponses.length} receipt(s)`,
+              placement: 'topRight',
+              icon: <PrinterOutlined style={{ color: '#52c41a' }} />,
+            });
+          } catch (printError) {
+            console.error('Failed to print receipts:', printError);
+            notification.error({
+              message: 'Print Failed',
+              description: `Failed to print some receipts: ${printError.message}`,
+              placement: 'topRight',
+            });
+          }
+        }, 500);
+      }
+      
       setTimeout(() => {
         carouselRef.current?.goTo(1);
         setResetPin(true);
@@ -508,15 +725,38 @@ const Page3 = ({
                     onChange={(key) => setSelectedMealTime(Number(key))}
                     tabBarStyle={{ fontWeight: "bold" }}
                     tabBarExtraContent={
-                      <Button
-                        type="default"
-                        icon={<RiAiGenerate />}
-                        onClick={fetchMealSuggestions}
-                        className={styles.filterButton}
-                        loading={loadingSuggestions}
-                      >
-                        Suggestions
-                      </Button>
+                      <Space>
+                        {/* <Button
+                          type="default"
+                          icon={<RiAiGenerate />}
+                          onClick={fetchMealSuggestions}
+                          className={styles.filterButton}
+                          loading={loadingSuggestions}
+                        >
+                          Suggestions
+                        </Button> */}
+                        <Button
+                          type={isPrinterConnected ? "default" : "primary"}
+                          icon={<PrinterOutlined />}
+                          onClick={connectThermalPrinter}
+                          className={styles.filterButton}
+                          loading={printingOrder}
+                          style={{
+                            backgroundColor: isPrinterConnected ? '#52c41a' : undefined,
+                            borderColor: isPrinterConnected ? '#52c41a' : undefined,
+                            color: isPrinterConnected ? 'white' : undefined
+                          }}
+                          title={isPrinterConnected && thermalPrinter ? 
+                            `Connected to: ${thermalPrinter.getPrinterStatus().deviceName}` : 
+                            'Click to connect thermal printer'
+                          }
+                        >
+                          {isPrinterConnected ? 
+                            `✓ ${thermalPrinter?.getPrinterStatus().deviceName?.substring(0, 8) || 'Printer'}` : 
+                            'Connect Printer'
+                          }
+                        </Button>
+                      </Space>
                     }
                     items={availableMealTimes.map((mealTimeItem) => {
                       const isAvailable = isMealTimeAvailable(mealTimeItem);
@@ -760,7 +1000,7 @@ const Page3 = ({
                                             }
                                             className={styles.actionButton}
                                           >
-                                            -
+                                            
                                           </Button>
                                           <Text
                                             className={styles.itemCountBadge}
@@ -779,7 +1019,7 @@ const Page3 = ({
                                             }
                                             className={styles.actionButton}
                                           >
-                                            +
+                                            
                                           </Button>
                                         </div>
                                         <div className={styles.priceDiv}>
@@ -824,19 +1064,308 @@ const Page3 = ({
                       size="large"
                       onClick={placeOrder}
                       disabled={orderItems.length === 0}
+                      loading={printingOrder}
                       className={`${styles.placeOrderButton} ${
                         orderItems.length === 0
                           ? styles.disabledButton
                           : styles.enabledButton
                       }`}
                     >
-                      {text.placeOrder}
+                      {printingOrder ? 'Printing Receipt...' : text.placeOrder}
                     </Button>
                     
                     <div className={styles.totalContainer}>
                       <Text strong>
                         {" "}
                       </Text>
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                        {isPrinterConnected && (
+                          <>
+                            {/* <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  await thermalPrinter.testPrint();
+                                } catch (error) {
+                                  console.error('Test print failed:', error);
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                            >
+                              Test Print
+                            </Button> */}
+                            {/* <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  await thermalPrinter.testBarcodeOnly();
+                                  notification.success({
+                                    message: 'Barcode Test Complete',
+                                    description: 'Check your printer for barcode test results',
+                                    placement: 'topRight',
+                                  });
+                                } catch (error) {
+                                  console.error('Barcode test failed:', error);
+                                  notification.error({
+                                    message: 'Barcode Test Failed',
+                                    description: error.message,
+                                    placement: 'topRight',
+                                  });
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              type="dashed"
+                            >
+                              Test Barcode
+                            </Button> */}
+                            {/* <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  
+                                  // Test with sample order data similar to actual order
+                                  const testOrderData = {
+                                    orderId: `TEST${Date.now()}`,
+                                    username: username?.name || 'Test User',
+                                    orderDate: new Date().toLocaleDateString('en-IN'),
+                                    orderTime: new Date().toLocaleTimeString('en-IN'),
+                                    mealType: 'Test Meal',
+                                    items: [{
+                                      name: 'Test Item',
+                                      quantity: 1,
+                                      price: 10.00
+                                    }],
+                                    totalPrice: 10.00
+                                  };
+                                  
+                                  await thermalPrinter.printOrder(testOrderData);
+                                  notification.success({
+                                    message: 'Order Receipt Test Complete',
+                                    description: `Test order receipt printed with barcode: ${testOrderData.orderId}`,
+                                    placement: 'topRight',
+                                  });
+                                } catch (error) {
+                                  console.error('Order receipt test failed:', error);
+                                  notification.error({
+                                    message: 'Order Receipt Test Failed',
+                                    description: error.message,
+                                    placement: 'topRight',
+                                  });
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              type="dashed"
+                            >
+                              Test Order Receipt
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  
+                                  // Direct barcode test with minimal commands
+                                  if (!thermalPrinter?.thermalPrinter?.isConnected) {
+                                    notification.error({
+                                      message: 'Printer Not Connected',
+                                      description: 'Please connect the thermal printer first',
+                                      placement: 'topRight',
+                                    });
+                                    return;
+                                  }
+                                  
+                                  console.log('🔧 DIRECT BARCODE TEST STARTING...');
+                                  
+                                  // Send direct barcode commands to printer
+                                  const directCommands = [
+                                    0x1B, 0x40,        // Initialize printer
+                                    0x1B, 0x61, 0x01,  // Center align
+                                    ...new TextEncoder().encode('DIRECT BARCODE TEST\n'),
+                                    0x1D, 0x68, 120,   // Set barcode height to 120 (extra large)
+                                    0x1D, 0x77, 5,     // Set barcode width to 5 (extra large)
+                                    0x1D, 0x48, 2,     // Print HRI below barcode
+                                    0x1D, 0x6B, 73,    // CODE128 barcode command
+                                    6,                  // Data length
+                                    ...new TextEncoder().encode('TEST01'), // Barcode data
+                                    0x0A, 0x0A, 0x0A,  // Line feeds
+                                    0x1D, 0x56, 0x01   // Partial cut
+                                  ];
+                                  
+                                  await thermalPrinter.thermalPrinter.sendData(new Uint8Array(directCommands));
+                                  
+                                  console.log('✅ DIRECT BARCODE COMMANDS SENT');
+                                  notification.success({
+                                    message: 'Direct Barcode Test Sent',
+                                    description: 'Direct barcode commands sent to printer. Check output!',
+                                    placement: 'topRight',
+                                  });
+                                } catch (error) {
+                                  console.error('❌ Direct barcode test failed:', error);
+                                  notification.error({
+                                    message: 'Direct Barcode Test Failed',
+                                    description: error.message,
+                                    placement: 'topRight',
+                                  });
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              type="primary"
+                            >
+                              Direct Test
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  
+                                  if (!thermalPrinter?.thermalPrinter?.isConnected) {
+                                    notification.error({
+                                      message: 'Printer Not Connected',
+                                      description: 'Please connect the thermal printer first',
+                                      placement: 'topRight',
+                                    });
+                                    return;
+                                  }
+                                  
+                                  console.log('🔧 EXTRA LARGE BARCODE TEST...');
+                                  
+                                  // Test extra large barcode
+                                  const commands = thermalPrinter.thermalPrinter.generateESCPOSCommands();
+                                  const testData = [
+                                    ...commands.init,
+                                    ...commands.alignCenter,
+                                    ...thermalPrinter.thermalPrinter.textToBytes('ULTRA LARGE BARCODE TEST'),
+                                    ...commands.crlf,
+                                    ...commands.crlf,
+                                    ...thermalPrinter.thermalPrinter.generateUltraLargeBarcode('ULTRATEST'),
+                                    ...commands.crlf,
+                                    ...commands.crlf,
+                                    ...commands.paperFeed
+                                  ];
+                                  
+                                  await thermalPrinter.thermalPrinter.sendData(new Uint8Array(testData));
+                                  
+                                  notification.success({
+                                    message: 'Ultra Large Barcode Test',
+                                    description: 'Ultra large barcode sent (200 height, 6x width)',
+                                    placement: 'topRight',
+                                  });
+                                } catch (error) {
+                                  console.error('❌ Extra large barcode test failed:', error);
+                                  notification.error({
+                                    message: 'Extra Large Test Failed',
+                                    description: error.message,
+                                    placement: 'topRight',
+                                  });
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              type="dashed"
+                            >
+                              Ultra XL
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  
+                                  if (!thermalPrinter?.thermalPrinter?.isConnected) {
+                                    notification.error({
+                                      message: 'Printer Not Connected',
+                                      description: 'Please connect the thermal printer first',
+                                      placement: 'topRight',
+                                    });
+                                    return;
+                                  }
+                                  
+                                  console.log('🔧 SIZE COMPARISON TEST...');
+                                  
+                                  // Test all barcode sizes for comparison
+                                  const commands = thermalPrinter.thermalPrinter.generateESCPOSCommands();
+                                  const testData = [
+                                    ...commands.init,
+                                    ...commands.alignCenter,
+                                    ...thermalPrinter.thermalPrinter.textToBytes('BARCODE SIZE COMPARISON'),
+                                    ...commands.crlf,
+                                    ...commands.crlf,
+                                    
+                                    // Standard size (120x5 - new default)
+                                    ...thermalPrinter.thermalPrinter.textToBytes('Default (120x5):'),
+                                    ...commands.crlf,
+                                    ...thermalPrinter.thermalPrinter.generateWorkingBarcode('SIZE1'),
+                                    ...commands.crlf,
+                                    ...commands.crlf,
+                                    
+                                    // Extra large (150x6)
+                                    ...thermalPrinter.thermalPrinter.textToBytes('Extra Large (150x6):'),
+                                    ...commands.crlf,
+                                    ...thermalPrinter.thermalPrinter.generateExtraLargeBarcode('SIZE2'),
+                                    ...commands.crlf,
+                                    ...commands.crlf,
+                                    
+                                    // Ultra large (200x6)
+                                    ...thermalPrinter.thermalPrinter.textToBytes('Ultra Large (200x6):'),
+                                    ...commands.crlf,
+                                    ...thermalPrinter.thermalPrinter.generateUltraLargeBarcode('SIZE3'),
+                                    ...commands.crlf,
+                                    ...commands.crlf,
+                                    
+                                    ...commands.paperFeed
+                                  ];
+                                  
+                                  await thermalPrinter.thermalPrinter.sendData(new Uint8Array(testData));
+                                  
+                                  notification.success({
+                                    message: 'Size Comparison Test',
+                                    description: 'All barcode sizes printed for comparison',
+                                    placement: 'topRight',
+                                  });
+                                } catch (error) {
+                                  console.error('❌ Size comparison test failed:', error);
+                                  notification.error({
+                                    message: 'Size Test Failed',
+                                    description: error.message,
+                                    placement: 'topRight',
+                                  });
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              type="ghost"
+                            >
+                              Size Test
+                            </Button> */}
+                          </>
+                        )}
+                      </div>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <Button
                           onClick={() => {
@@ -861,6 +1390,12 @@ const Page3 = ({
                             setShowSuccess(false);
                             setShowError(false);
                             setLoading(true);
+                            
+                            // Disconnect thermal printer
+                            if (thermalPrinter) {
+                              thermalPrinter.disconnect();
+                              setIsPrinterConnected(false);
+                            }
                             
                             // Clear meal data from context
                             clearData();

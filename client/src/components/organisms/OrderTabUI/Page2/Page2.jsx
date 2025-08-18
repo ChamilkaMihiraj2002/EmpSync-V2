@@ -725,7 +725,7 @@ const Page2 = ({
       <div className={styles.full}>
         <div>
           <Typography.Title level={1} className={styles.mainTitle1}>
-            Welcome to <span>Helix</span> Food Ordering
+            Welcome to <span>Biz</span> Food Ordering
           </Typography.Title>
         </div>
         <div className={styles.dateAndTime}>
