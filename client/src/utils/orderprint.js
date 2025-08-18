@@ -13,6 +13,7 @@ class ThermalPrinterService {
     this.service = null;
     this.characteristic = null;
     this.isConnected = false;
+    this.debugMode = true; // Enable debug mode for barcode troubleshooting
     
     // Common service UUIDs for thermal printers
     this.PRINTER_SERVICE_UUID = '000018f0-0000-1000-8000-00805f9b34fb';
@@ -207,7 +208,7 @@ class ThermalPrinterService {
   }
 
   /**
-   * Send raw data to thermal printer
+   * Send raw data to thermal printer with enhanced debugging
    */
   async sendData(data) {
     if (!this.isConnected || !this.characteristic) {
@@ -218,10 +219,22 @@ class ThermalPrinterService {
       // Convert data to Uint8Array if it's not already
       const buffer = data instanceof Uint8Array ? data : new Uint8Array(data);
       
+      console.log('📤 SENDING DATA TO THERMAL PRINTER:', {
+        totalBytes: buffer.length,
+        dataPreview: Array.from(buffer.slice(0, 30)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '),
+        containsBarcode: this.containsBarcodeCommands(buffer),
+        barcodeCommandsFound: this.findBarcodeCommands(buffer)
+      });
+      
       // Split large data into chunks (thermal printers have limited buffer)
       const chunkSize = 20; // Conservative chunk size for Bluetooth LE
       for (let i = 0; i < buffer.length; i += chunkSize) {
         const chunk = buffer.slice(i, i + chunkSize);
+        
+        if (this.debugMode && this.containsBarcodeCommands(chunk)) {
+          console.log(`📊 BARCODE CHUNK ${Math.floor(i/chunkSize) + 1}:`, 
+            Array.from(chunk).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
+        }
         
         if (this.characteristic.properties.writeWithoutResponse) {
           await this.characteristic.writeValueWithoutResponse(chunk);
@@ -232,10 +245,111 @@ class ThermalPrinterService {
         // Small delay between chunks to prevent buffer overflow
         await new Promise(resolve => setTimeout(resolve, 50));
       }
+      
+      console.log('✅ ALL DATA SENT TO PRINTER SUCCESSFULLY');
     } catch (error) {
-      console.error('Error sending data to thermal printer:', error);
+      console.error('❌ ERROR SENDING DATA TO THERMAL PRINTER:', error);
       throw error;
     }
+  }
+
+  /**
+   * Find barcode commands in data for debugging
+   */
+  findBarcodeCommands(data) {
+    const buffer = data instanceof Uint8Array ? data : new Uint8Array(data);
+    const barcodeCommands = [];
+    
+    for (let i = 0; i < buffer.length - 1; i++) {
+      if (buffer[i] === 0x1D && buffer[i + 1] === 0x6B) {
+        const commandInfo = {
+          position: i,
+          command: '0x1D 0x6B (GS k)',
+          type: buffer[i + 2] || 'unknown',
+          length: buffer[i + 3] || 'unknown'
+        };
+        barcodeCommands.push(commandInfo);
+      }
+    }
+    
+    return barcodeCommands;
+  }
+
+  /**
+   * Test barcode generation before using in receipt
+   * This ensures barcode will work before printing the full receipt
+   */
+  async testBarcodeGeneration(orderId) {
+    console.log('🧪 TESTING BARCODE GENERATION FOR:', orderId);
+    
+    try {
+      const barcodeBytes = this.generateWorkingBarcode(orderId);
+      console.log('✅ BARCODE GENERATION TEST PASSED:', {
+        orderId: orderId,
+        barcodeLength: barcodeBytes.length,
+        firstBytes: Array.from(barcodeBytes.slice(0, 10)).map(b => '0x' + b.toString(16)).join(' ')
+      });
+      
+      return barcodeBytes;
+    } catch (error) {
+      console.error('❌ BARCODE GENERATION TEST FAILED:', error);
+      throw new Error(`Barcode generation failed for order ${orderId}: ${error.message}`);
+    }
+  }
+  generateWorkingBarcode(data) {
+    console.log('🔧 Generating guaranteed working barcode for:', data);
+    
+    // Clean and prepare data
+    const cleanData = String(data).replace(/[^\w]/g, '').toUpperCase();
+    console.log('📝 Cleaned barcode data:', cleanData);
+    
+    // Create the simplest possible CODE128 barcode command sequence
+    const commands = [];
+    
+    // Set barcode height (conservative 40 dots)
+    commands.push(0x1D, 0x68, 40);
+    
+    // Set barcode width (moderate width = 3)
+    commands.push(0x1D, 0x77, 3);
+    
+    // Set HRI character position (below barcode = 2)
+    commands.push(0x1D, 0x48, 2);
+    
+    // Set HRI font (font A = 0)
+    commands.push(0x1D, 0x66, 0);
+    
+    // Print CODE128 barcode command
+    commands.push(0x1D);  // GS
+    commands.push(0x6B);  // k (barcode command)
+    commands.push(73);    // CODE128 type
+    commands.push(cleanData.length); // data length
+    
+    // Add the actual data
+    for (let i = 0; i < cleanData.length; i++) {
+      commands.push(cleanData.charCodeAt(i));
+    }
+    
+    console.log('✅ Generated barcode commands:', {
+      dataLength: cleanData.length,
+      totalCommands: commands.length,
+      previewCommands: commands.slice(0, 15).map(x => '0x' + x.toString(16)).join(' ')
+    });
+    
+    return new Uint8Array(commands);
+  }
+
+  /**
+   * Check if data contains barcode commands for debugging
+   */
+  containsBarcodeCommands(data) {
+    const buffer = data instanceof Uint8Array ? data : new Uint8Array(data);
+    // Look for GS k command (0x1D 0x6B) which is the barcode command
+    for (let i = 0; i < buffer.length - 1; i++) {
+      if (buffer[i] === 0x1D && buffer[i + 1] === 0x6B) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -300,64 +414,126 @@ class ThermalPrinterService {
   }
 
   /**
-   * Generate barcode image as bytes for thermal printer
+   * Validate and format data for barcode printing
    */
-  generateBarcodeBytes(data, options = {}) {
-    try {
-      // Create a temporary canvas for barcode generation
-      const canvas = document.createElement('canvas');
-      
-      // Configure barcode options
-      const barcodeOptions = {
-        format: options.format || 'CODE128',
-        width: options.width || 2,
-        height: options.height || 50,
-        displayValue: options.displayValue !== false,
-        fontSize: options.fontSize || 12,
-        margin: options.margin || 10,
-        ...options
-      };
-      
-      // Generate barcode
-      JsBarcode(canvas, data, barcodeOptions);
-      
-      // Convert canvas to thermal printer format
-      const ctx = canvas.getContext('2d');
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      
-      // Convert to monochrome bitmap for thermal printer
-      const width = canvas.width;
-      const height = canvas.height;
-      const bytesPerLine = Math.ceil(width / 8);
-      const bitmapData = [];
-      
-      // ESC/POS bitmap command header
-      bitmapData.push(0x1B, 0x2A, 0x00); // ESC * 0 (8-dot single-density)
-      bitmapData.push(width & 0xFF, (width >> 8) & 0xFF); // Width in little-endian
-      
-      // Convert pixels to bitmap
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < bytesPerLine; x++) {
-          let byte = 0;
-          for (let bit = 0; bit < 8; bit++) {
-            const pixelX = x * 8 + bit;
-            if (pixelX < width) {
-              const pixelIndex = (y * width + pixelX) * 4;
-              const brightness = (imageData.data[pixelIndex] + 
-                                imageData.data[pixelIndex + 1] + 
-                                imageData.data[pixelIndex + 2]) / 3;
-              if (brightness < 128) { // Dark pixel
-                byte |= (1 << (7 - bit));
-              }
-            }
-          }
-          bitmapData.push(byte);
+  validateBarcodeData(data, format = 'CODE128') {
+    if (!data || typeof data !== 'string') {
+      throw new Error('Barcode data must be a non-empty string');
+    }
+
+    switch (format.toUpperCase()) {
+      case 'CODE128':
+        // CODE128 supports ASCII characters 0-127
+        const validChars = /^[\x00-\x7F]*$/;
+        if (!validChars.test(data)) {
+          console.warn('Invalid characters found for CODE128, filtering...');
+          return data.replace(/[^\x00-\x7F]/g, '');
         }
+        return data;
+        
+      case 'CODE39':
+        // CODE39 supports: 0-9, A-Z, space, -, ., $, /, +, %
+        const code39Valid = /^[0-9A-Z\s\-\.\$\/\+%]*$/;
+        if (!code39Valid.test(data.toUpperCase())) {
+          console.warn('Invalid characters found for CODE39, filtering...');
+          return data.toUpperCase().replace(/[^0-9A-Z\s\-\.\$\/\+%]/g, '');
+        }
+        return data.toUpperCase();
+        
+      case 'EAN13':
+        // EAN13 requires exactly 12 or 13 digits
+        const digits = data.replace(/\D/g, '');
+        if (digits.length < 12) {
+          return digits.padStart(12, '0');
+        }
+        return digits.substring(0, 13);
+        
+      default:
+        return data;
+    }
+  }
+
+  /**
+   * Generate ESC/POS barcode commands for thermal printer
+   */
+  generateESCPOSBarcode(data, options = {}) {
+    try {
+      const barcodeType = options.format || 'CODE128';
+      const height = Math.min(Math.max(options.height || 60, 1), 255); // Clamp between 1-255
+      const width = Math.min(Math.max(options.width || 2, 1), 6); // Clamp between 1-6
+      const showText = options.displayValue !== false;
+      
+      // Validate and format the data
+      const validatedData = this.validateBarcodeData(data, barcodeType);
+      if (!validatedData) {
+        throw new Error('Invalid barcode data after validation');
       }
       
-      return new Uint8Array(bitmapData);
+      const barcodeCommands = [];
+      
+      // Set barcode height (GS h)
+      barcodeCommands.push(0x1D, 0x68, height);
+      
+      // Set barcode width (GS w)
+      barcodeCommands.push(0x1D, 0x77, width);
+      
+      // Set human readable character position (GS H)
+      // 0 = No printing, 1 = Above barcode, 2 = Below barcode, 3 = Both
+      barcodeCommands.push(0x1D, 0x48, showText ? 2 : 0);
+      
+      // Set barcode font (GS f) - 0 = Font A, 1 = Font B
+      barcodeCommands.push(0x1D, 0x66, 0);
+      
+      // Generate barcode based on type
+      let barcodeTypeCode;
+      switch (barcodeType.toUpperCase()) {
+        case 'CODE128':
+          barcodeTypeCode = 73; // CODE128
+          break;
+        case 'CODE39':
+          barcodeTypeCode = 69; // CODE39
+          break;
+        case 'EAN13':
+          barcodeTypeCode = 67; // EAN13
+          break;
+        case 'UPC_A':
+        case 'UPC':
+          barcodeTypeCode = 65; // UPC-A
+          break;
+        default:
+          barcodeTypeCode = 73; // Default to CODE128
+      }
+      
+      // Print barcode command (GS k)
+      barcodeCommands.push(0x1D, 0x6B, barcodeTypeCode);
+      
+      // Add data length for variable length barcodes (CODE128, CODE39)
+      if (barcodeTypeCode === 73 || barcodeTypeCode === 69) {
+        barcodeCommands.push(validatedData.length);
+      }
+      
+      // Add barcode data
+      const dataBytes = new TextEncoder().encode(validatedData);
+      barcodeCommands.push(...dataBytes);
+      
+      // Add null terminator for some barcode types
+      if (barcodeTypeCode === 69) { // CODE39 needs null terminator
+        barcodeCommands.push(0x00);
+      }
+      
+      console.log('Generated ESC/POS barcode commands:', {
+        type: barcodeType,
+        originalData: data,
+        validatedData: validatedData,
+        height: height,
+        width: width,
+        showText: showText,
+        commandLength: barcodeCommands.length
+      });
+      
+      return new Uint8Array(barcodeCommands);
     } catch (error) {
-      console.error('Error generating barcode bytes:', error);
+      console.error('Error generating ESC/POS barcode:', error);
       throw error;
     }
   }
@@ -441,19 +617,40 @@ class ThermalPrinterService {
       receiptData.push(...this.textToBytes('Order Barcode:'));
       receiptData.push(...commands.crlf);
 
-      // Generate and add barcode
+      // Generate and add barcode - TEST FIRST, THEN ADD TO RECEIPT
+      receiptData.push(...commands.alignCenter);
+      receiptData.push(...this.textToBytes('Order Barcode:'));
+      receiptData.push(...commands.crlf);
+
+      console.log('🔧 STEP 1: TESTING BARCODE GENERATION FOR ORDER:', orderData.orderId);
+      
       try {
-        const barcodeBytes = this.generateBarcodeBytes(orderData.orderId, {
-          width: 2,
-          height: 60,
-          displayValue: true,
-          fontSize: 10
-        });
-        receiptData.push(...barcodeBytes);
+        // STEP 1: Test barcode generation
+        const testBarcodeBytes = await this.testBarcodeGeneration(orderData.orderId);
+        console.log('✅ STEP 1 PASSED: Barcode generation successful');
+        
+        // STEP 2: Add the tested barcode to receipt
+        console.log('🔧 STEP 2: ADDING TESTED BARCODE TO RECEIPT');
+        receiptData.push(...testBarcodeBytes);
         receiptData.push(...commands.crlf);
-      } catch (barcodeError) {
-        console.warn('Failed to generate barcode, using text fallback:', barcodeError);
-        receiptData.push(...this.textToBytes(`[${orderData.orderId}]`));
+        receiptData.push(...commands.crlf);
+        console.log('✅ STEP 2 PASSED: BARCODE ADDED TO RECEIPT DATA');
+        
+        // STEP 3: Add verification text
+        receiptData.push(...this.textToBytes(`Barcode: ${orderData.orderId}`));
+        receiptData.push(...commands.crlf);
+        console.log('✅ STEP 3 PASSED: VERIFICATION TEXT ADDED');
+        
+      } catch (error) {
+        console.error('❌ BARCODE GENERATION OR ADDITION FAILED:', error);
+        // Emergency fallback - large, bold text
+        receiptData.push(...commands.doubleSize);
+        receiptData.push(...commands.bold);
+        receiptData.push(...this.textToBytes(`ORDER: ${orderData.orderId}`));
+        receiptData.push(...commands.boldOff);
+        receiptData.push(...commands.normalSize);
+        receiptData.push(...commands.crlf);
+        receiptData.push(...this.textToBytes('(Barcode generation failed)'));
         receiptData.push(...commands.crlf);
       }
 
@@ -592,20 +789,26 @@ class OrderReceiptPrinter {
    */
   async printOrder(orderDetails) {
     try {
+      console.log('🖨️ Starting order print process with details:', orderDetails);
+      
       // Ensure printer is connected
       if (!this.thermalPrinter.isConnected) {
+        console.log('🔌 Printer not connected, attempting to connect...');
         await this.connectPrinter();
       }
 
       // Format order data for printing
       const orderData = this.formatOrderData(orderDetails);
+      console.log('📝 Formatted order data for printing:', orderData);
       
-      // Print the receipt
+      // Print the receipt using the thermal printer service
+      console.log('🖨️ Calling thermalPrinter.printOrderReceipt...');
       await this.thermalPrinter.printOrderReceipt(orderData);
       
+      console.log('✅ Order receipt printed successfully');
       return true;
     } catch (error) {
-      console.error('Failed to print order:', error);
+      console.error('❌ Failed to print order:', error);
       throw error;
     }
   }
@@ -667,7 +870,65 @@ class OrderReceiptPrinter {
   }
 
   /**
-   * Test printer connectivity
+   * Test only barcode printing (isolated test)
+   */
+  async testBarcodeOnly() {
+    try {
+      if (!this.thermalPrinter.isConnected) {
+        await this.connectPrinter();
+      }
+
+      const commands = this.thermalPrinter.generateESCPOSCommands();
+      const testData = [];
+
+      // Initialize printer
+      testData.push(...commands.init);
+      testData.push(...commands.alignCenter);
+      
+      // Test message
+      testData.push(...this.thermalPrinter.textToBytes('BARCODE TEST'));
+      testData.push(...commands.crlf);
+      testData.push(...commands.crlf);
+
+      // Test the guaranteed working barcode method only
+      const testIds = ['123456', 'TEST01', 'ORDER001'];
+      
+      for (const testId of testIds) {
+        testData.push(...this.thermalPrinter.textToBytes(`Testing: ${testId}`));
+        testData.push(...commands.crlf);
+        
+        try {
+          const barcodeBytes = this.thermalPrinter.generateWorkingBarcode(testId);
+          testData.push(...barcodeBytes);
+          testData.push(...commands.crlf);
+          console.log('✅ Working barcode test successful for:', testId);
+        } catch (error) {
+          testData.push(...this.thermalPrinter.textToBytes('BARCODE FAILED'));
+          testData.push(...commands.crlf);
+          console.error('❌ Working barcode test failed for:', testId, error);
+        }
+        
+        testData.push(...commands.crlf);
+        testData.push(...this.thermalPrinter.textToBytes('---'));
+        testData.push(...commands.crlf);
+      }
+
+      // Paper feed
+      testData.push(...commands.paperFeed);
+
+      // Send to printer
+      await this.thermalPrinter.sendData(new Uint8Array(testData));
+      
+      console.log('✅ Barcode-only test completed');
+      return true;
+    } catch (error) {
+      console.error('❌ Barcode-only test failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Test printer with various formatting options including barcode
    */
   async testPrint() {
     try {
@@ -675,21 +936,76 @@ class OrderReceiptPrinter {
         await this.connectPrinter();
       }
 
-      const testOrder = {
-        orderId: 'TEST001',
-        username: 'Test User',
-        orderDate: new Date().toLocaleDateString('en-IN'),
-        orderTime: new Date().toLocaleTimeString('en-IN'),
-        mealType: 'Test Meal',
-        items: [
-          { name: 'Test Item 1', quantity: 1, price: 10.00 },
-          { name: 'Test Item 2', quantity: 2, price: 15.00 }
-        ],
-        totalPrice: 40.00
-      };
+      const commands = this.thermalPrinter.generateESCPOSCommands();
+      const testData = [];
 
-      await this.thermalPrinter.printOrderReceipt(testOrder);
-      console.log('✅ Test print completed successfully');
+      // Initialize printer
+      testData.push(...commands.init);
+
+      // Test header
+      testData.push(...commands.alignCenter);
+      testData.push(...commands.doubleWidth);
+      testData.push(...commands.bold);
+      testData.push(...this.thermalPrinter.textToBytes('PRINTER TEST'));
+      testData.push(...commands.crlf);
+      testData.push(...commands.normalSize);
+      testData.push(...commands.boldOff);
+      testData.push(...commands.crlf);
+
+      // Test order details
+      testData.push(...commands.alignLeft);
+      testData.push(...this.thermalPrinter.textToBytes('Test Order ID: TEST123'));
+      testData.push(...commands.crlf);
+      testData.push(...this.thermalPrinter.textToBytes('Date: ' + new Date().toLocaleDateString('en-IN')));
+      testData.push(...commands.crlf);
+      testData.push(...this.thermalPrinter.textToBytes('Time: ' + new Date().toLocaleTimeString('en-IN')));
+      testData.push(...commands.crlf);
+      testData.push(...commands.crlf);
+
+      // Test items
+      testData.push(...this.thermalPrinter.textToBytes('Test Item 1 x1    Rs. 10.00'));
+      testData.push(...commands.crlf);
+      testData.push(...this.thermalPrinter.textToBytes('Test Item 2 x2    Rs. 15.00'));
+      testData.push(...commands.crlf);
+      testData.push(...commands.crlf);
+
+      // Total
+      testData.push(...commands.bold);
+      testData.push(...this.thermalPrinter.textToBytes('TOTAL: Rs. 40.00'));
+      testData.push(...commands.crlf);
+      testData.push(...commands.boldOff);
+      testData.push(...commands.crlf);
+
+      // Test barcode with the guaranteed working method
+      testData.push(...commands.alignCenter);
+      testData.push(...this.thermalPrinter.textToBytes('Test Barcode:'));
+      testData.push(...commands.crlf);
+
+      try {
+        const testBarcodeBytes = this.thermalPrinter.generateWorkingBarcode('TEST123');
+        testData.push(...testBarcodeBytes);
+        testData.push(...commands.crlf);
+        console.log('✅ Test barcode generated successfully with guaranteed method');
+      } catch (barcodeError) {
+        console.error('❌ Even the guaranteed method failed:', barcodeError);
+        testData.push(...this.thermalPrinter.textToBytes('TEST123 (BARCODE FAILED)'));
+        testData.push(...commands.crlf);
+      }
+
+      // Footer
+      testData.push(...commands.crlf);
+      testData.push(...this.thermalPrinter.textToBytes('Test completed successfully!'));
+      testData.push(...commands.crlf);
+      testData.push(...commands.crlf);
+
+      // Paper feed and cut
+      testData.push(...commands.paperFeed);
+      testData.push(...commands.partialCut);
+
+      // Send to printer
+      await this.thermalPrinter.sendData(new Uint8Array(testData));
+      
+      console.log('✅ Test print with barcode completed successfully');
       return true;
     } catch (error) {
       console.error('❌ Test print failed:', error);

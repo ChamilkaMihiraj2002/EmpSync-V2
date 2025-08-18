@@ -1024,24 +1024,159 @@ const Page3 = ({
                       </Text>
                       <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                         {isPrinterConnected && (
-                          <Button
-                            onClick={async () => {
-                              try {
-                                setPrintingOrder(true);
-                                await thermalPrinter.testPrint();
-                              } catch (error) {
-                                console.error('Test print failed:', error);
-                              } finally {
-                                setPrintingOrder(false);
-                              }
-                            }}
-                            className={styles.backButton}
-                            loading={printingOrder}
-                            icon={<PrinterOutlined />}
-                            size="small"
-                          >
-                            Test Print
-                          </Button>
+                          <>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  await thermalPrinter.testPrint();
+                                } catch (error) {
+                                  console.error('Test print failed:', error);
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                            >
+                              Test Print
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  await thermalPrinter.testBarcodeOnly();
+                                  notification.success({
+                                    message: 'Barcode Test Complete',
+                                    description: 'Check your printer for barcode test results',
+                                    placement: 'topRight',
+                                  });
+                                } catch (error) {
+                                  console.error('Barcode test failed:', error);
+                                  notification.error({
+                                    message: 'Barcode Test Failed',
+                                    description: error.message,
+                                    placement: 'topRight',
+                                  });
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              type="dashed"
+                            >
+                              Test Barcode
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  
+                                  // Test with sample order data similar to actual order
+                                  const testOrderData = {
+                                    orderId: `TEST${Date.now()}`,
+                                    username: username?.name || 'Test User',
+                                    orderDate: new Date().toLocaleDateString('en-IN'),
+                                    orderTime: new Date().toLocaleTimeString('en-IN'),
+                                    mealType: 'Test Meal',
+                                    items: [{
+                                      name: 'Test Item',
+                                      quantity: 1,
+                                      price: 10.00
+                                    }],
+                                    totalPrice: 10.00
+                                  };
+                                  
+                                  await thermalPrinter.printOrder(testOrderData);
+                                  notification.success({
+                                    message: 'Order Receipt Test Complete',
+                                    description: `Test order receipt printed with barcode: ${testOrderData.orderId}`,
+                                    placement: 'topRight',
+                                  });
+                                } catch (error) {
+                                  console.error('Order receipt test failed:', error);
+                                  notification.error({
+                                    message: 'Order Receipt Test Failed',
+                                    description: error.message,
+                                    placement: 'topRight',
+                                  });
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              type="dashed"
+                            >
+                              Test Order Receipt
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  setPrintingOrder(true);
+                                  
+                                  // Direct barcode test with minimal commands
+                                  if (!thermalPrinter?.thermalPrinter?.isConnected) {
+                                    notification.error({
+                                      message: 'Printer Not Connected',
+                                      description: 'Please connect the thermal printer first',
+                                      placement: 'topRight',
+                                    });
+                                    return;
+                                  }
+                                  
+                                  console.log('🔧 DIRECT BARCODE TEST STARTING...');
+                                  
+                                  // Send direct barcode commands to printer
+                                  const directCommands = [
+                                    0x1B, 0x40,        // Initialize printer
+                                    0x1B, 0x61, 0x01,  // Center align
+                                    ...new TextEncoder().encode('DIRECT BARCODE TEST\n'),
+                                    0x1D, 0x68, 50,    // Set barcode height to 50
+                                    0x1D, 0x77, 3,     // Set barcode width to 3
+                                    0x1D, 0x48, 2,     // Print HRI below barcode
+                                    0x1D, 0x6B, 73,    // CODE128 barcode command
+                                    6,                  // Data length
+                                    ...new TextEncoder().encode('TEST01'), // Barcode data
+                                    0x0A, 0x0A, 0x0A,  // Line feeds
+                                    0x1D, 0x56, 0x01   // Partial cut
+                                  ];
+                                  
+                                  await thermalPrinter.thermalPrinter.sendData(new Uint8Array(directCommands));
+                                  
+                                  console.log('✅ DIRECT BARCODE COMMANDS SENT');
+                                  notification.success({
+                                    message: 'Direct Barcode Test Sent',
+                                    description: 'Direct barcode commands sent to printer. Check output!',
+                                    placement: 'topRight',
+                                  });
+                                } catch (error) {
+                                  console.error('❌ Direct barcode test failed:', error);
+                                  notification.error({
+                                    message: 'Direct Barcode Test Failed',
+                                    description: error.message,
+                                    placement: 'topRight',
+                                  });
+                                } finally {
+                                  setPrintingOrder(false);
+                                }
+                              }}
+                              className={styles.backButton}
+                              loading={printingOrder}
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              type="primary"
+                            >
+                              Direct Test
+                            </Button>
+                          </>
                         )}
                       </div>
                       <div style={{ display: 'flex', gap: '8px' }}>
