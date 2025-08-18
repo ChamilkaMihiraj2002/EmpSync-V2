@@ -670,7 +670,7 @@ const Page3 = ({
                     tabBarStyle={{ fontWeight: "bold" }}
                     tabBarExtraContent={
                       <Space>
-                        <Button
+                        {/* <Button
                           type="default"
                           icon={<RiAiGenerate />}
                           onClick={fetchMealSuggestions}
@@ -678,7 +678,7 @@ const Page3 = ({
                           loading={loadingSuggestions}
                         >
                           Suggestions
-                        </Button>
+                        </Button> */}
                         <Button
                           type={isPrinterConnected ? "default" : "primary"}
                           icon={<PrinterOutlined />}
@@ -1025,7 +1025,7 @@ const Page3 = ({
                       <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                         {isPrinterConnected && (
                           <>
-                            <Button
+                            {/* <Button
                               onClick={async () => {
                                 try {
                                   setPrintingOrder(true);
@@ -1042,8 +1042,8 @@ const Page3 = ({
                               size="small"
                             >
                               Test Print
-                            </Button>
-                            <Button
+                            </Button> */}
+                            {/* <Button
                               onClick={async () => {
                                 try {
                                   setPrintingOrder(true);
@@ -1071,8 +1071,8 @@ const Page3 = ({
                               type="dashed"
                             >
                               Test Barcode
-                            </Button>
-                            <Button
+                            </Button> */}
+                            {/* <Button
                               onClick={async () => {
                                 try {
                                   setPrintingOrder(true);
@@ -1306,7 +1306,7 @@ const Page3 = ({
                               type="ghost"
                             >
                               Size Test
-                            </Button>
+                            </Button> */}
                           </>
                         )}
                       </div>
