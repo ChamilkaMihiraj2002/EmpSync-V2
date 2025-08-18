@@ -1000,7 +1000,7 @@ const Page3 = ({
                                             }
                                             className={styles.actionButton}
                                           >
-                                            -
+                                            
                                           </Button>
                                           <Text
                                             className={styles.itemCountBadge}
@@ -1019,7 +1019,7 @@ const Page3 = ({
                                             }
                                             className={styles.actionButton}
                                           >
-                                            +
+                                            
                                           </Button>
                                         </div>
                                         <div className={styles.priceDiv}>
