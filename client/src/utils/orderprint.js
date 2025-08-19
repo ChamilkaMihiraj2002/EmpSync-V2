@@ -575,8 +575,11 @@ class ThermalPrinterService {
       const commands = this.generateESCPOSCommands();
       const receiptData = [];
 
-      // Initialize printer
-      receiptData.push(...commands.init);
+      // Initialize printer without paper movement
+      // Using selective initialization instead of full reset to prevent paper feed
+      receiptData.push(...commands.alignLeft); // Set default alignment
+      receiptData.push(...commands.normalSize); // Set normal text size
+      receiptData.push(...commands.boldOff); // Ensure bold is off initially
       
       // Header - Company name
       receiptData.push(...commands.alignCenter);
@@ -897,8 +900,10 @@ class OrderReceiptPrinter {
       const commands = this.thermalPrinter.generateESCPOSCommands();
       const testData = [];
 
-      // Initialize printer
-      testData.push(...commands.init);
+      // Initialize printer without paper movement
+      testData.push(...commands.alignLeft);
+      testData.push(...commands.normalSize);
+      testData.push(...commands.boldOff);
       testData.push(...commands.alignCenter);
       
       // Test message
@@ -955,8 +960,10 @@ class OrderReceiptPrinter {
       const commands = this.thermalPrinter.generateESCPOSCommands();
       const testData = [];
 
-      // Initialize printer
-      testData.push(...commands.init);
+      // Initialize printer without paper movement
+      testData.push(...commands.alignLeft);
+      testData.push(...commands.normalSize);
+      testData.push(...commands.boldOff);
 
       // Test header
       testData.push(...commands.alignCenter);
