@@ -33,25 +33,31 @@ const Report = () => {
   const [employeeStartDate, setEmployeeStartDate] = useState("");
   const [employeeEndDate, setEmployeeEndDate] = useState("");
 
-  //  Common Functions.....
-
-  // Function to format date
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-CA"); // YYYY-MM-DD format
+  // ---------- Timezone Helpers (Sri Lanka, UTC+5:30) ----------
+  const toSriLankaTime = (input) => {
+    if (!input) return null;
+    const date = input instanceof Date ? input : new Date(input);
+    const utcMs = date.getTime() + date.getTimezoneOffset() * 60000;
+    return new Date(utcMs + (5 * 60 + 30) * 60000);
   };
 
-  // Function to format time
+  // Format date/time using Sri Lanka time
+  const formatDate = (dateString) => {
+    const date = toSriLankaTime(dateString);
+    if (!date) return "N/A";
+    return date.toLocaleDateString("en-CA"); // YYYY-MM-DD
+  };
+
   const formatTime = (timeString) => {
-    if (!timeString) return "N/A";
-    const time = new Date(timeString);
-    return time.toLocaleTimeString("en-US", {
+    const date = toSriLankaTime(timeString);
+    if (!date) return "N/A";
+    return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
   };
+  // ------------------------------------------------------------
 
   // API calls to fetch orders
   const fetchOrders = async () => {
@@ -128,15 +134,9 @@ const Report = () => {
   };
   //End of common functions....
 
-  //Summary Report......
+  // ---------- Summary Report ----------
   // Enhanced data processing with actual order prices
   const processEmployeeMealData = (orders, employees, mealTypes) => {
-    // console.log("Processing data with:", {
-    //   ordersCount: orders?.length || 0,
-    //   employeesCount: employees?.length || 0,
-    //   mealTypesCount: mealTypes?.length || 0,
-    // });
-
     if (!orders || !employees || !mealTypes) {
       console.error("Missing required data for processing");
       return { processedData: [], dynamicMealTypes: [] };
@@ -155,8 +155,6 @@ const Report = () => {
       if (userId) {
         acc[userId] = userName;
       }
-
-      // console.log(`Mapped user: UserID=${userId}, UserName=${userName}`);
       return acc;
     }, {});
 
@@ -168,26 +166,19 @@ const Report = () => {
       if (mealId) {
         acc[mealId] = mealName.toLowerCase();
         acc[mealId.toString()] = mealName.toLowerCase();
-      
       }
       return acc;
     }, {});
-
-    // console.log("User lookup map (UserID -> UserName):", employeeMap);
-    // console.log("Meal type map:", mealTypeMap);
 
     // Get unique employee IDs from orders
     const uniqueEmployeeIds = [
       ...new Set(
         orders.map((order) => {
           const empId = order.employeeId;
-          console.log(`Order employee ID: ${empId} (type: ${typeof empId})`);
           return empId;
         })
       ),
     ].filter((id) => id !== null && id !== undefined);
-
-    console.log("Unique employee IDs from orders:", uniqueEmployeeIds);
 
     // Get unique meal types from orders
     const uniqueMealTypeIds = [
@@ -195,9 +186,7 @@ const Report = () => {
     ].filter((id) => id !== null && id !== undefined);
 
     const dynamicMealTypes = uniqueMealTypeIds.map((mealTypeId) => {
-      const mealTypeName =
-        mealTypeMap[mealTypeId];
-;
+      const mealTypeName = mealTypeMap[mealTypeId];
       return {
         id: mealTypeId,
         name: mealTypeName,
@@ -206,106 +195,64 @@ const Report = () => {
       };
     });
 
-    // console.log("Dynamic meal types:", dynamicMealTypes);
-
     // Initialize employee meal counts and prices
     const employeeMealCounts = {};
 
     // Initialize all employees who have orders
     uniqueEmployeeIds.forEach((empId) => {
       if (empId !== null && empId !== undefined) {
-        const userName =
-          employeeMap[empId] ||
-          `Employee ${empId}`;
+        const userName = employeeMap[empId] || `Employee ${empId}`;
 
         const employeeRecord = {
           employeeId: empId,
           employeeName: userName,
           totalMeals: 0,
-          totalAmount: 0, // Add total amount tracking
+          totalAmount: 0,
         };
 
         // Initialize all meal type counts and prices to 0
         dynamicMealTypes.forEach((mealType) => {
           employeeRecord[mealType.name] = 0;
-          employeeRecord[`${mealType.name}_price`] = 0; // Track price for each meal type
+          employeeRecord[`${mealType.name}_price`] = 0;
         });
 
         employeeMealCounts[empId] = employeeRecord;
-        // console.log(
-        //   `Initialized employee record with user name:`,
-        //   employeeRecord
-        // );
       }
     });
 
-    // Process orders and count meals with actual prices - FIXED SECTION
+    // Process orders and count meals with actual prices
     orders.forEach((order) => {
       const employeeId = order.employeeId;
       const mealTypeId = order.mealTypeId;
 
-      // FIXED: Properly parse the price from the order
       const orderPrice = parseFloat(order.price || 0);
 
-      // console.log(`Processing order:`, {
-      //   employeeId,
-      //   mealTypeId,
-      //   orderPrice,
-      //   rawPrice: order.price,
-      //   orderData: order,
-      // });
-
       if (employeeId && mealTypeId && employeeMealCounts[employeeId]) {
-        const mealTypeName =
-          mealTypeMap[mealTypeId] ;
+        const mealTypeName = mealTypeMap[mealTypeId];
 
-        // console.log(
-        //   `Processing order: Employee ${employeeId}, Meal Type ID: ${mealTypeId}, Meal Type Name: ${mealTypeName}, Price: ${orderPrice}`
-        // );
-
-        // FIXED: Calculate meal count more accurately
         let mealCount = 1;
         if (order.meals && Array.isArray(order.meals)) {
           mealCount = order.meals.length;
         } else if (order.meals && typeof order.meals === "string") {
-          // Handle string array format like "['meal1', 'meal2']"
           try {
             const parsedMeals = JSON.parse(order.meals);
             mealCount = Array.isArray(parsedMeals) ? parsedMeals.length : 1;
           } catch (e) {
-            // If parsing fails, try splitting by comma
             mealCount = order.meals.split(",").length;
           }
-        } 
+        }
 
-        // FIXED: Increment meal count and add price based on meal type
         if (
           mealTypeName &&
           employeeMealCounts[employeeId][mealTypeName] !== undefined
         ) {
           employeeMealCounts[employeeId][mealTypeName] += mealCount;
-
-          // FIXED: Add the actual order price 
           employeeMealCounts[employeeId][`${mealTypeName}_price`] += orderPrice;
           employeeMealCounts[employeeId].totalMeals += mealCount;
           employeeMealCounts[employeeId].totalAmount += orderPrice;
-
-          // console.log(`Updated employee ${employeeId}:`, {
-          //   mealType: mealTypeName,
-          //   mealCount: employeeMealCounts[employeeId][mealTypeName],
-          //   mealPrice: employeeMealCounts[employeeId][`${mealTypeName}_price`],
-          //   totalAmount: employeeMealCounts[employeeId].totalAmount,
-          // });
         } else {
-          // If meal type name not found, still count total meals and amount
           employeeMealCounts[employeeId].totalMeals += mealCount;
           employeeMealCounts[employeeId].totalAmount += orderPrice;
-
-          // console.log(`Unknown meal type for employee ${employeeId}:`, {
-          //   mealTypeId,
-          //   mealTypeName,
-          //   totalAmount: employeeMealCounts[employeeId].totalAmount,
-          // });
         }
       } else {
         console.warn(`Skipping order - missing data:`, {
@@ -325,9 +272,7 @@ const Report = () => {
       })
     );
 
-    // console.log("Final processed data with prices:", processedData);
-
-    // FIXED: Add validation to ensure prices are properly calculated
+    // Optional sanity logs
     processedData.forEach((employee) => {
       console.log(`Employee ${employee.employeeName} summary:`, {
         totalMeals: employee.totalMeals,
@@ -344,14 +289,14 @@ const Report = () => {
     return { processedData, dynamicMealTypes };
   };
 
-  // Filter data based on time period
+  // Filter data based on time period (Sri Lanka time)
   const filterDataByTimePeriod = (
     orders,
     period,
     customStartDate = null,
     customEndDate = null
   ) => {
-    const now = new Date();
+    const now = toSriLankaTime(new Date());
     let startDate, endDate;
 
     switch (period) {
@@ -373,11 +318,11 @@ const Report = () => {
         break;
       case "custom":
         if (customStartDate && customEndDate) {
-          startDate = new Date(customStartDate);
-          endDate = new Date(customEndDate);
-          endDate.setHours(23, 59, 59, 999); // Include the entire end date
+          startDate = toSriLankaTime(customStartDate);
+          endDate = toSriLankaTime(customEndDate);
+          endDate.setHours(23, 59, 59, 999);
         } else {
-          return orders; // Return all orders if custom dates not provided
+          return orders;
         }
         break;
       default:
@@ -385,9 +330,7 @@ const Report = () => {
     }
 
     return orders.filter((order) => {
-      const orderDate = new Date(
-        order.orderDate 
-      );
+      const orderDate = toSriLankaTime(order.orderDate);
       return orderDate >= startDate && orderDate <= endDate;
     });
   };
@@ -397,23 +340,13 @@ const Report = () => {
     setLoading(true);
     try {
       const [ordersData, employeesData, mealTypesData] =
-        await Promise.allSettled([
-          fetchOrders(),
-          fetchEmployees(),
-          fetchMealTypes(),
-        ]);
+        await Promise.allSettled([fetchOrders(), fetchEmployees(), fetchMealTypes()]);
 
       const orders = ordersData.status === "fulfilled" ? ordersData.value : [];
       const employees =
         employeesData.status === "fulfilled" ? employeesData.value : [];
       const mealTypes =
         mealTypesData.status === "fulfilled" ? mealTypesData.value : [];
-
-      // console.log("Data fetch results:", {
-      //   orders: { status: ordersData.status, count: orders.length },
-      //   employees: { status: employeesData.status, count: employees.length },
-      //   mealTypes: { status: mealTypesData.status, count: mealTypes.length },
-      // });
 
       setOrders(orders);
       setEmployees(employees);
@@ -437,7 +370,6 @@ const Report = () => {
           customStartDate,
           customEndDate
         );
-        // console.log("Filtered orders:", filteredOrders.length);
 
         const result = processEmployeeMealData(
           filteredOrders,
@@ -614,9 +546,6 @@ const Report = () => {
   };
 
   const handleGenerateReport = () => {
-    // console.log(`Generating ${timePeriod} report...`);
-
-    // Validate custom date range if selected
     if (timePeriod === "custom") {
       if (!startDate || !endDate) {
         message.error(
@@ -634,6 +563,7 @@ const Report = () => {
 
     loadData(customStartDate, customEndDate);
   };
+
   // Table columns definition
   const columns = [
     {
@@ -721,7 +651,7 @@ const Report = () => {
 
       groupedByMealType[mealTypeName].orders.push(order);
       groupedByMealType[mealTypeName].totalOrders += 1;
-     if (order.serve === true) {
+      if (order.serve === true) {
         groupedByMealType[mealTypeName].servedOrders += 1;
       }
     });
@@ -826,7 +756,7 @@ const Report = () => {
     customStartDate = null,
     customEndDate = null
   ) => {
-    const now = new Date();
+    const now = toSriLankaTime(new Date());
     let startDate, endDate;
 
     switch (period) {
@@ -848,8 +778,8 @@ const Report = () => {
         break;
       case "custom":
         if (customStartDate && customEndDate) {
-          startDate = new Date(customStartDate);
-          endDate = new Date(customEndDate);
+          startDate = toSriLankaTime(customStartDate);
+          endDate = toSriLankaTime(customEndDate);
           endDate.setHours(23, 59, 59, 999);
         } else {
           return orders;
@@ -859,18 +789,9 @@ const Report = () => {
         return orders;
     }
 
-    console.log(
-      "Filtering orders from:",
-      startDate.toISOString(),
-      "to:",
-      endDate.toISOString()
-    );
-
     return orders.filter((order) => {
-      const orderDate = new Date(
-        order.orderDate 
-      );
-
+      const orderDate = toSriLankaTime(order.orderDate);
+    
       const isInRange = orderDate >= startDate && orderDate <= endDate;
       if (!isInRange) {
         // console.log("Order excluded:", {
@@ -896,7 +817,6 @@ const Report = () => {
       const response = await axios.get(`${urL}/orders`, {
         params: {
           orgId: authData?.orgId,
-      
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -975,13 +895,8 @@ const Report = () => {
 
       // Sort by order date and time (newest first)
       ordersWithMealTypes.sort((a, b) => {
-        const dateA = new Date(
-          a.orderPlacedTime
-          
-        );
-        const dateB = new Date(
-          b.orderPlacedTime 
-        );
+        const dateA = new Date(a.orderPlacedTime);
+        const dateB = new Date(b.orderPlacedTime);
         return dateB - dateA;
       });
 
@@ -1003,7 +918,7 @@ const Report = () => {
     customStartDate = null,
     customEndDate = null
   ) => {
-    const now = new Date();
+    const now = toSriLankaTime(new Date());
     let startDate, endDate;
 
     switch (period) {
@@ -1025,8 +940,8 @@ const Report = () => {
         break;
       case "custom":
         if (customStartDate && customEndDate) {
-          startDate = new Date(customStartDate);
-          endDate = new Date(customEndDate);
+          startDate = toSriLankaTime(customStartDate);
+          endDate = toSriLankaTime(customEndDate);
           endDate.setHours(23, 59, 59, 999);
         } else {
           return orders;
@@ -1037,7 +952,7 @@ const Report = () => {
     }
 
     return orders.filter((order) => {
-      const orderDate = new Date(order.orderDate || order.orderPlacedTime);
+      const orderDate = toSriLankaTime(order.orderDate);
       return orderDate >= startDate && orderDate <= endDate;
     });
   };
@@ -1052,76 +967,18 @@ const Report = () => {
       date: formatDate(order.orderDate || order.order_date),
       mealType: order.mealTypeName || `Meal Type ${order.mealTypeId}`,
       orderTime: formatTime(order.orderPlacedTime || order.order_placed_time),
-      status: determineOrderStatus(order, mealTypes), // Use the new logic
+      status: determineOrderStatus(order), // Simplified - no need to pass mealTypes
       price: `Rs. ${(order.price || 0).toFixed(2)}`,
       orderId: order.id,
       ...order, // Include all order data for potential future use
     }));
   };
 
-  const determineOrderStatus = (order, mealTypes) => {
-    // If order is already served, return 'Served'
-    if (order.serve === true || order.served === true) {
-      return "Served";
-    }
-
-    // Get order date
-    const orderDate = new Date(order.orderDate || order.order_date);
-    const today = new Date();
-
-    // Set time to start of day for comparison
-    const orderDateOnly = new Date(
-      orderDate.getFullYear(),
-      orderDate.getMonth(),
-      orderDate.getDate()
-    );
-    const todayDateOnly = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-
-    // If order is from previous day, it's 'Not Served'
-    if (orderDateOnly < todayDateOnly) {
-      return "Not Served";
-    }
-
-    // If order is from today, check meal type end time
-    if (orderDateOnly.getTime() === todayDateOnly.getTime()) {
-      // Find the meal type for this order
-      const mealType = mealTypes.find(
-        (mt) =>
-          mt.id === order.mealTypeId ||
-          mt.mealTypeId === order.mealTypeId ||
-          mt.meal_type_id === order.mealTypeId
-      );
-
-      if (
-        mealType &&
-        mealType.time &&
-        Array.isArray(mealType.time) &&
-        mealType.time.length >= 2
-      ) {
-        // Get end time (second element in the time array)
-        const endTime = mealType.time[1]; // e.g., "21:00"
-
-        // Create current time and meal end time for comparison
-        const now = new Date();
-        const currentTime = now.getHours() * 60 + now.getMinutes(); // Convert to minutes
-
-        // Parse meal end time
-        const [endHours, endMinutes] = endTime.split(":").map(Number);
-        const mealEndTime = endHours * 60 + endMinutes; // Convert to minutes
-
-        // If current time has passed meal end time, it's 'Not Served'
-        if (currentTime > mealEndTime) {
-          return "Not Served";
-        }
-      }
-    }
-
-    // Default to 'Pending' for today's orders within time or if we can't determine meal type time
-    return "Pending";
+  const determineOrderStatus = (order) => {
+    // Simply check if order is served (boolean)
+    return order.serve === true || order.served === true
+      ? "Served"
+      : "Not Served";
   };
 
   // Updated employee report table columns
@@ -1161,9 +1018,7 @@ const Report = () => {
           className={
             status === "Served"
               ? styles.statusBadgeServed
-              : status === "Not Served"
-              ? styles.statusBadgeNotServed // You'll need to add this CSS class
-              : styles.statusBadgePending
+              : styles.statusBadgeNotServed
           }
         >
           {status}
@@ -1171,14 +1026,11 @@ const Report = () => {
       ),
     },
   ];
-
-  // Calculate employee report summary
   const calculateEmployeeReportSummary = () => {
     if (!individualEmployeeData || individualEmployeeData.length === 0) {
       return {
         totalOrders: 0,
         servedOrders: 0,
-        pendingOrders: 0,
         notServedOrders: 0,
         totalAmount: 0,
         efficiency: 0,
@@ -1189,9 +1041,6 @@ const Report = () => {
     const totalOrders = reportData.length;
     const servedOrders = reportData.filter(
       (order) => order.status === "Served"
-    ).length;
-    const pendingOrders = reportData.filter(
-      (order) => order.status === "Pending"
     ).length;
     const notServedOrders = reportData.filter(
       (order) => order.status === "Not Served"
@@ -1207,7 +1056,6 @@ const Report = () => {
     return {
       totalOrders,
       servedOrders,
-      pendingOrders,
       notServedOrders,
       totalAmount,
       efficiency,
@@ -1240,7 +1088,7 @@ const Report = () => {
     }
 
     try {
-      // Convert empNo to userid 
+      // Convert empNo to userid
       const res = await axios.get(`${urL}/user/empno/${employeeId}`, {
         params: { orgId: authData?.orgId },
         headers: { Authorization: `Bearer ${token}` },
@@ -1353,7 +1201,6 @@ const Report = () => {
         break;
 
       case "employee":
-        // This is a placeholder - you'll need to implement employee-specific data
         const employeeReportData = generateEmployeeReportData();
 
         if (!employeeReportData || employeeReportData.length === 0) {
@@ -1361,7 +1208,15 @@ const Report = () => {
           return;
         }
 
-        exportData = employeeReportData.map(({ key, ...rest }) => rest);
+        // Only export the columns that are displayed in the table
+        exportData = employeeReportData.map(({ key, ...rest }) => ({
+          date: rest.date,
+          mealType: rest.mealType,
+          orderTime: rest.orderTime,
+          price: rest.price,
+          status: rest.status,
+        }));
+
         fileName = `Employee_Individual_Report_${
           employeeId || "All"
         }_${employeeTimePeriod}.xlsx`;
@@ -1853,7 +1708,6 @@ const Report = () => {
                         <Table.Summary.Cell index={4} align="center">
                           <strong>
                             {summary.servedOrders} Served /{" "}
-                            {summary.pendingOrders} Pending /{" "}
                             {summary.notServedOrders} Not Served
                           </strong>
                         </Table.Summary.Cell>
