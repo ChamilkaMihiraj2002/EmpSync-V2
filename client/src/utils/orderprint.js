@@ -598,9 +598,7 @@ class ThermalPrinterService {
       receiptData.push(...commands.boldOff);
       
       receiptData.push(...this.textToBytes(`${orderData.mealType} | ${orderData.orderDate}`));
-      receiptData.push(...commands.crlf);
       
-      receiptData.push(...this.textToBytes(`Printed: ${orderData.orderTime}`));
       // receiptData.push(...commands.crlf);
       receiptData.push(...commands.crlf);
 
@@ -678,6 +676,9 @@ class ThermalPrinterService {
       receiptData.push(...commands.crlf);
       receiptData.push(...this.textToBytes('Present this receipt when collecting your meal.'));
       receiptData.push(...commands.crlf);
+      // receiptData.push(...commands.crlf);
+      
+      receiptData.push(...this.textToBytes(`Printed: ${orderData.orderTime}`));
 
       // Paper feed and cut - Enhanced for proper cutting
       receiptData.push(...commands.paperFeed);
