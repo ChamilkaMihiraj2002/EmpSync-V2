@@ -503,12 +503,21 @@ const Page3 = ({
         );
 
         const orderPlacedTime = currentTimeRef.current.toISOString();
+        // Use the specific date from this grouped order (not the currently selected date)
         const orderDate =
-          selectedDate === "today"
+          date === "today"
             ? currentTimeRef.current.toISOString()
             : new Date(
                 currentTimeRef.current.getTime() + 24 * 60 * 60 * 1000
               ).toISOString();
+
+        console.log(`🗓️ Order date calculation for ${key}:`, {
+          orderKey: key,
+          orderDateType: date,
+          calculatedOrderDate: orderDate,
+          mealTime: mealTime,
+          currentlySelectedDate: selectedDate
+        });
 
         const orderData = {
           employeeId: userId || "unknown",
