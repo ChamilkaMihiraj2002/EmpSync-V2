@@ -577,7 +577,7 @@ class ThermalPrinterService {
 
       // Initialize printer
       receiptData.push(...commands.init);
-
+      
       // Header - Company name
       receiptData.push(...commands.alignCenter);
       receiptData.push(...commands.doubleWidth);
@@ -587,6 +587,7 @@ class ThermalPrinterService {
       receiptData.push(...commands.normalSize);
       receiptData.push(...commands.boldOff);
       receiptData.push(...this.textToBytes('Employee Meal Order'));
+      receiptData.push(...commands.crlf);
       receiptData.push(...commands.crlf);
 
       // Order details - Compact format
@@ -600,11 +601,11 @@ class ThermalPrinterService {
       receiptData.push(...commands.crlf);
       
       receiptData.push(...this.textToBytes(`Printed: ${orderData.orderTime}`));
-      receiptData.push(...commands.crlf);
+      // receiptData.push(...commands.crlf);
       receiptData.push(...commands.crlf);
 
       // Separator line
-      receiptData.push(...this.textToBytes('--------------------------------'));
+      receiptData.push(...this.textToBytes('-----------------------------------------------'));
       receiptData.push(...commands.crlf);
 
       // Order items - Compact format
@@ -614,15 +615,30 @@ class ThermalPrinterService {
       receiptData.push(...commands.boldOff);
       
       orderData.items.forEach(item => {
-        receiptData.push(...this.textToBytes(`${item.name} x${item.quantity} - Rs.${item.price.toFixed(2)}`));
+        // Format item with right-aligned price (47 chars total width for 80mm paper)
+        const itemText = `${item.name} x${item.quantity}`;
+        const priceText = `Rs.${item.price.toFixed(2)}`;
+        const totalWidth = 45; // Adjust for 80mm thermal paper
+        const padding = totalWidth - itemText.length - priceText.length;
+        const spaces = padding > 0 ? ' '.repeat(padding) : ' ';
+        
+        receiptData.push(...this.textToBytes(`${itemText}${spaces}${priceText}`));
         receiptData.push(...commands.crlf);
       });
 
       // Total - Compact
-      receiptData.push(...this.textToBytes('--------------------------------'));
+      receiptData.push(...this.textToBytes('-----------------------------------------------'));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.bold);
-      receiptData.push(...this.textToBytes(`TOTAL: Rs. ${orderData.totalPrice.toFixed(2)}`));
+      
+      // Right-aligned total
+      const totalText = 'TOTAL:';
+      const totalPriceText = `Rs. ${orderData.totalPrice.toFixed(2)}`;
+      const totalWidth = 45;
+      const totalPadding = totalWidth - totalText.length - totalPriceText.length;
+      const totalSpaces = totalPadding > 0 ? ' '.repeat(totalPadding) : ' ';
+      
+      receiptData.push(...this.textToBytes(`${totalText}${totalSpaces}${totalPriceText}`));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.boldOff);
 
@@ -651,18 +667,16 @@ class ThermalPrinterService {
         receiptData.push(...this.textToBytes(`ORDER: ${orderData.orderId}`));
         receiptData.push(...commands.boldOff);
         receiptData.push(...commands.normalSize);
-        receiptData.push(...commands.crlf);
+        // receiptData.push(...commands.crlf);
         receiptData.push(...this.textToBytes('(Barcode generation failed)'));
-        receiptData.push(...commands.crlf);
+        // receiptData.push(...commands.crlf);
       }
 
       // Footer - Compact
-      receiptData.push(...commands.crlf);
+      // receiptData.push(...commands.crlf);
       receiptData.push(...this.textToBytes('Thank you !'));
       receiptData.push(...commands.crlf);
       receiptData.push(...this.textToBytes('Present this receipt when collecting your meal.'));
-      receiptData.push(...commands.crlf);
-      receiptData.push(...commands.crlf);
       receiptData.push(...commands.crlf);
 
       // Paper feed and cut - Enhanced for proper cutting
