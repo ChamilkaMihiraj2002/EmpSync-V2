@@ -600,10 +600,10 @@ class ThermalPrinterService {
       receiptData.push(...this.textToBytes(`Employee: ${orderData.username}`));
       receiptData.push(...commands.crlf);
       
-      receiptData.push(...this.textToBytes(`Date: ${orderData.orderDate}`));
+      receiptData.push(...this.textToBytes(`Order Date: ${orderData.orderDate}`));
       receiptData.push(...commands.crlf);
       
-      receiptData.push(...this.textToBytes(`Time: ${orderData.orderTime}`));
+      receiptData.push(...this.textToBytes(`Printed: ${orderData.orderTime}`));
       receiptData.push(...commands.crlf);
       
       receiptData.push(...this.textToBytes(`Meal Type: ${orderData.mealType}`));

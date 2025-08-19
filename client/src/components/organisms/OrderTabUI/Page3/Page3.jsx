@@ -425,8 +425,9 @@ const Page3 = ({
         new Date(orderDate).toLocaleDateString('en-IN') : 
         new Date().toLocaleDateString('en-IN');
 
-      // Current system time for receipt printing
-      const currentPrintTime = new Date().toLocaleTimeString('en-IN');
+      // Current system date and time for receipt printing
+      const currentDateTime = new Date();
+      const currentPrintTime = `${currentDateTime.toLocaleDateString('en-IN')} ${currentDateTime.toLocaleTimeString('en-IN')}`;
 
       // Prepare order data for printing
       const orderData = {
@@ -443,7 +444,7 @@ const Page3 = ({
         orderId,
         mealType: mealTypeName,
         orderDate: formattedOrderDate,
-        printTime: currentPrintTime,
+        printDateTime: currentPrintTime,
         itemCount: printItems.length,
         totalPrice
       });
