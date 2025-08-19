@@ -427,7 +427,7 @@ class ThermalPrinterService {
       crlf: [0x0D, 0x0A], // Carriage return + Line feed
       
       // Paper feed
-      paperFeed: [0x1B, 0x64, 0x03], // ESC d 3 (feed 3 lines)
+      paperFeed: [0x1B, 0x64, 0x05], // ESC d 5 (feed 5 lines for better separation)
     };
   }
 
@@ -658,14 +658,16 @@ class ThermalPrinterService {
 
       // Footer - Compact
       receiptData.push(...commands.crlf);
-      receiptData.push(...this.textToBytes('Thank you! Present this receipt'));
+      receiptData.push(...this.textToBytes('Thank you !'));
       receiptData.push(...commands.crlf);
-      receiptData.push(...this.textToBytes('when collecting your meal.'));
+      receiptData.push(...this.textToBytes('Present this receipt when collecting your meal.'));
+      receiptData.push(...commands.crlf);
+      receiptData.push(...commands.crlf);
       receiptData.push(...commands.crlf);
 
-      // Paper feed and cut
+      // Paper feed and cut - Enhanced for proper cutting
       receiptData.push(...commands.paperFeed);
-      receiptData.push(...commands.partialCut);
+      receiptData.push(...commands.cut); // Use full cut for cleaner separation
 
       // Send to printer
       await this.sendData(new Uint8Array(receiptData));
@@ -996,10 +998,11 @@ class OrderReceiptPrinter {
       testData.push(...this.thermalPrinter.textToBytes('Test completed successfully!'));
       testData.push(...commands.crlf);
       testData.push(...commands.crlf);
+      testData.push(...commands.crlf);
 
-      // Paper feed and cut
+      // Paper feed and cut - Enhanced for proper cutting
       testData.push(...commands.paperFeed);
-      testData.push(...commands.partialCut);
+      testData.push(...commands.cut);
 
       // Send to printer
       await this.thermalPrinter.sendData(new Uint8Array(testData));
