@@ -33,25 +33,31 @@ const Report = () => {
   const [employeeStartDate, setEmployeeStartDate] = useState("");
   const [employeeEndDate, setEmployeeEndDate] = useState("");
 
-  //  Common Functions.....
-
-  // Function to format date
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-CA"); // YYYY-MM-DD format
+  // ---------- Timezone Helpers (Sri Lanka, UTC+5:30) ----------
+  const toSriLankaTime = (input) => {
+    if (!input) return null;
+    const date = input instanceof Date ? input : new Date(input);
+    const utcMs = date.getTime() + date.getTimezoneOffset() * 60000;
+    return new Date(utcMs + (5 * 60 + 30) * 60000);
   };
 
-  // Function to format time
+  // Format date/time using Sri Lanka time
+  const formatDate = (dateString) => {
+    const date = toSriLankaTime(dateString);
+    if (!date) return "N/A";
+    return date.toLocaleDateString("en-CA"); // YYYY-MM-DD
+  };
+
   const formatTime = (timeString) => {
-    if (!timeString) return "N/A";
-    const time = new Date(timeString);
-    return time.toLocaleTimeString("en-US", {
+    const date = toSriLankaTime(timeString);
+    if (!date) return "N/A";
+    return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
   };
+  // ------------------------------------------------------------
 
   // API calls to fetch orders
   const fetchOrders = async () => {
@@ -128,15 +134,9 @@ const Report = () => {
   };
   //End of common functions....
 
-  //Summary Report......
+  // ---------- Summary Report ----------
   // Enhanced data processing with actual order prices
   const processEmployeeMealData = (orders, employees, mealTypes) => {
-    // console.log("Processing data with:", {
-    //   ordersCount: orders?.length || 0,
-    //   employeesCount: employees?.length || 0,
-    //   mealTypesCount: mealTypes?.length || 0,
-    // });
-
     if (!orders || !employees || !mealTypes) {
       console.error("Missing required data for processing");
       return { processedData: [], dynamicMealTypes: [] };
@@ -155,8 +155,6 @@ const Report = () => {
       if (userId) {
         acc[userId] = userName;
       }
-
-      // console.log(`Mapped user: UserID=${userId}, UserName=${userName}`);
       return acc;
     }, {});
 
@@ -172,21 +170,15 @@ const Report = () => {
       return acc;
     }, {});
 
-    // console.log("User lookup map (UserID -> UserName):", employeeMap);
-    // console.log("Meal type map:", mealTypeMap);
-
     // Get unique employee IDs from orders
     const uniqueEmployeeIds = [
       ...new Set(
         orders.map((order) => {
           const empId = order.employeeId;
-          console.log(`Order employee ID: ${empId} (type: ${typeof empId})`);
           return empId;
         })
       ),
     ].filter((id) => id !== null && id !== undefined);
-
-    console.log("Unique employee IDs from orders:", uniqueEmployeeIds);
 
     // Get unique meal types from orders
     const uniqueMealTypeIds = [
@@ -203,8 +195,6 @@ const Report = () => {
       };
     });
 
-    // console.log("Dynamic meal types:", dynamicMealTypes);
-
     // Initialize employee meal counts and prices
     const employeeMealCounts = {};
 
@@ -217,89 +207,52 @@ const Report = () => {
           employeeId: empId,
           employeeName: userName,
           totalMeals: 0,
-          totalAmount: 0, // Add total amount tracking
+          totalAmount: 0,
         };
 
         // Initialize all meal type counts and prices to 0
         dynamicMealTypes.forEach((mealType) => {
           employeeRecord[mealType.name] = 0;
-          employeeRecord[`${mealType.name}_price`] = 0; // Track price for each meal type
+          employeeRecord[`${mealType.name}_price`] = 0;
         });
 
         employeeMealCounts[empId] = employeeRecord;
-        // console.log(
-        //   `Initialized employee record with user name:`,
-        //   employeeRecord
-        // );
       }
     });
 
-    // Process orders and count meals with actual prices - FIXED SECTION
+    // Process orders and count meals with actual prices
     orders.forEach((order) => {
       const employeeId = order.employeeId;
       const mealTypeId = order.mealTypeId;
 
-      // FIXED: Properly parse the price from the order
       const orderPrice = parseFloat(order.price || 0);
-
-      // console.log(`Processing order:`, {
-      //   employeeId,
-      //   mealTypeId,
-      //   orderPrice,
-      //   rawPrice: order.price,
-      //   orderData: order,
-      // });
 
       if (employeeId && mealTypeId && employeeMealCounts[employeeId]) {
         const mealTypeName = mealTypeMap[mealTypeId];
 
-        // console.log(
-        //   `Processing order: Employee ${employeeId}, Meal Type ID: ${mealTypeId}, Meal Type Name: ${mealTypeName}, Price: ${orderPrice}`
-        // );
-
-        // FIXED: Calculate meal count more accurately
         let mealCount = 1;
         if (order.meals && Array.isArray(order.meals)) {
           mealCount = order.meals.length;
         } else if (order.meals && typeof order.meals === "string") {
-          // Handle string array format like "['meal1', 'meal2']"
           try {
             const parsedMeals = JSON.parse(order.meals);
             mealCount = Array.isArray(parsedMeals) ? parsedMeals.length : 1;
           } catch (e) {
-            // If parsing fails, try splitting by comma
             mealCount = order.meals.split(",").length;
           }
         }
 
-        // FIXED: Increment meal count and add price based on meal type
         if (
           mealTypeName &&
           employeeMealCounts[employeeId][mealTypeName] !== undefined
         ) {
           employeeMealCounts[employeeId][mealTypeName] += mealCount;
-
-          // FIXED: Add the actual order price
           employeeMealCounts[employeeId][`${mealTypeName}_price`] += orderPrice;
           employeeMealCounts[employeeId].totalMeals += mealCount;
           employeeMealCounts[employeeId].totalAmount += orderPrice;
-
-          // console.log(`Updated employee ${employeeId}:`, {
-          //   mealType: mealTypeName,
-          //   mealCount: employeeMealCounts[employeeId][mealTypeName],
-          //   mealPrice: employeeMealCounts[employeeId][`${mealTypeName}_price`],
-          //   totalAmount: employeeMealCounts[employeeId].totalAmount,
-          // });
         } else {
-          // If meal type name not found, still count total meals and amount
           employeeMealCounts[employeeId].totalMeals += mealCount;
           employeeMealCounts[employeeId].totalAmount += orderPrice;
-
-          // console.log(`Unknown meal type for employee ${employeeId}:`, {
-          //   mealTypeId,
-          //   mealTypeName,
-          //   totalAmount: employeeMealCounts[employeeId].totalAmount,
-          // });
         }
       } else {
         console.warn(`Skipping order - missing data:`, {
@@ -319,9 +272,7 @@ const Report = () => {
       })
     );
 
-    // console.log("Final processed data with prices:", processedData);
-
-    // FIXED: Add validation to ensure prices are properly calculated
+    // Optional sanity logs
     processedData.forEach((employee) => {
       console.log(`Employee ${employee.employeeName} summary:`, {
         totalMeals: employee.totalMeals,
@@ -338,14 +289,14 @@ const Report = () => {
     return { processedData, dynamicMealTypes };
   };
 
-  // Filter data based on time period
+  // Filter data based on time period (Sri Lanka time)
   const filterDataByTimePeriod = (
     orders,
     period,
     customStartDate = null,
     customEndDate = null
   ) => {
-    const now = new Date();
+    const now = toSriLankaTime(new Date());
     let startDate, endDate;
 
     switch (period) {
@@ -367,11 +318,11 @@ const Report = () => {
         break;
       case "custom":
         if (customStartDate && customEndDate) {
-          startDate = new Date(customStartDate);
-          endDate = new Date(customEndDate);
-          endDate.setHours(23, 59, 59, 999); // Include the entire end date
+          startDate = toSriLankaTime(customStartDate);
+          endDate = toSriLankaTime(customEndDate);
+          endDate.setHours(23, 59, 59, 999);
         } else {
-          return orders; // Return all orders if custom dates not provided
+          return orders;
         }
         break;
       default:
@@ -379,7 +330,7 @@ const Report = () => {
     }
 
     return orders.filter((order) => {
-      const orderDate = new Date(order.orderDate);
+      const orderDate = toSriLankaTime(order.orderDate);
       return orderDate >= startDate && orderDate <= endDate;
     });
   };
@@ -389,23 +340,13 @@ const Report = () => {
     setLoading(true);
     try {
       const [ordersData, employeesData, mealTypesData] =
-        await Promise.allSettled([
-          fetchOrders(),
-          fetchEmployees(),
-          fetchMealTypes(),
-        ]);
+        await Promise.allSettled([fetchOrders(), fetchEmployees(), fetchMealTypes()]);
 
       const orders = ordersData.status === "fulfilled" ? ordersData.value : [];
       const employees =
         employeesData.status === "fulfilled" ? employeesData.value : [];
       const mealTypes =
         mealTypesData.status === "fulfilled" ? mealTypesData.value : [];
-
-      // console.log("Data fetch results:", {
-      //   orders: { status: ordersData.status, count: orders.length },
-      //   employees: { status: employeesData.status, count: employees.length },
-      //   mealTypes: { status: mealTypesData.status, count: mealTypes.length },
-      // });
 
       setOrders(orders);
       setEmployees(employees);
@@ -429,7 +370,6 @@ const Report = () => {
           customStartDate,
           customEndDate
         );
-        // console.log("Filtered orders:", filteredOrders.length);
 
         const result = processEmployeeMealData(
           filteredOrders,
@@ -606,9 +546,6 @@ const Report = () => {
   };
 
   const handleGenerateReport = () => {
-    // console.log(`Generating ${timePeriod} report...`);
-
-    // Validate custom date range if selected
     if (timePeriod === "custom") {
       if (!startDate || !endDate) {
         message.error(
@@ -626,6 +563,7 @@ const Report = () => {
 
     loadData(customStartDate, customEndDate);
   };
+
   // Table columns definition
   const columns = [
     {
@@ -818,7 +756,7 @@ const Report = () => {
     customStartDate = null,
     customEndDate = null
   ) => {
-    const now = new Date();
+    const now = toSriLankaTime(new Date());
     let startDate, endDate;
 
     switch (period) {
@@ -840,8 +778,8 @@ const Report = () => {
         break;
       case "custom":
         if (customStartDate && customEndDate) {
-          startDate = new Date(customStartDate);
-          endDate = new Date(customEndDate);
+          startDate = toSriLankaTime(customStartDate);
+          endDate = toSriLankaTime(customEndDate);
           endDate.setHours(23, 59, 59, 999);
         } else {
           return orders;
@@ -851,16 +789,9 @@ const Report = () => {
         return orders;
     }
 
-    console.log(
-      "Filtering orders from:",
-      startDate.toISOString(),
-      "to:",
-      endDate.toISOString()
-    );
-
     return orders.filter((order) => {
-      const orderDate = new Date(order.orderDate);
-
+      const orderDate = toSriLankaTime(order.orderDate);
+    
       const isInRange = orderDate >= startDate && orderDate <= endDate;
       if (!isInRange) {
         // console.log("Order excluded:", {
@@ -987,7 +918,7 @@ const Report = () => {
     customStartDate = null,
     customEndDate = null
   ) => {
-    const now = new Date();
+    const now = toSriLankaTime(new Date());
     let startDate, endDate;
 
     switch (period) {
@@ -1009,8 +940,8 @@ const Report = () => {
         break;
       case "custom":
         if (customStartDate && customEndDate) {
-          startDate = new Date(customStartDate);
-          endDate = new Date(customEndDate);
+          startDate = toSriLankaTime(customStartDate);
+          endDate = toSriLankaTime(customEndDate);
           endDate.setHours(23, 59, 59, 999);
         } else {
           return orders;
@@ -1021,7 +952,7 @@ const Report = () => {
     }
 
     return orders.filter((order) => {
-      const orderDate = new Date(order.orderDate || order.orderPlacedTime);
+      const orderDate = toSriLankaTime(order.orderDate);
       return orderDate >= startDate && orderDate <= endDate;
     });
   };
