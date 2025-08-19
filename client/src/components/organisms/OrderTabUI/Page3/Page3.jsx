@@ -425,8 +425,9 @@ const Page3 = ({
         new Date(orderDate).toLocaleDateString('en-IN') : 
         new Date().toLocaleDateString('en-IN');
 
-      // Current system time for receipt printing
-      const currentPrintTime = new Date().toLocaleTimeString('en-IN');
+      // Current system date and time for receipt printing
+      const currentDateTime = new Date();
+      const currentPrintTime = `${currentDateTime.toLocaleDateString('en-IN')} ${currentDateTime.toLocaleTimeString('en-IN')}`;
 
       // Prepare order data for printing
       const orderData = {
@@ -443,7 +444,7 @@ const Page3 = ({
         orderId,
         mealType: mealTypeName,
         orderDate: formattedOrderDate,
-        printTime: currentPrintTime,
+        printDateTime: currentPrintTime,
         itemCount: printItems.length,
         totalPrice
       });
@@ -503,12 +504,21 @@ const Page3 = ({
         );
 
         const orderPlacedTime = currentTimeRef.current.toISOString();
+        // Use the specific date from this grouped order (not the currently selected date)
         const orderDate =
-          selectedDate === "today"
+          date === "today"
             ? currentTimeRef.current.toISOString()
             : new Date(
                 currentTimeRef.current.getTime() + 24 * 60 * 60 * 1000
               ).toISOString();
+
+        console.log(`🗓️ Order date calculation for ${key}:`, {
+          orderKey: key,
+          orderDateType: date,
+          calculatedOrderDate: orderDate,
+          mealTime: mealTime,
+          currentlySelectedDate: selectedDate
+        });
 
         const orderData = {
           employeeId: userId || "unknown",

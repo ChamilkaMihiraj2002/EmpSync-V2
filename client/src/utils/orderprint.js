@@ -427,7 +427,7 @@ class ThermalPrinterService {
       crlf: [0x0D, 0x0A], // Carriage return + Line feed
       
       // Paper feed
-      paperFeed: [0x1B, 0x64, 0x03], // ESC d 3 (feed 3 lines)
+      paperFeed: [0x1B, 0x64, 0x05], // ESC d 5 (feed 5 lines for better separation)
     };
   }
 
@@ -575,9 +575,12 @@ class ThermalPrinterService {
       const commands = this.generateESCPOSCommands();
       const receiptData = [];
 
-      // Initialize printer
-      receiptData.push(...commands.init);
-
+      // Initialize printer without paper movement
+      // Using selective initialization instead of full reset to prevent paper feed
+      receiptData.push(...commands.alignLeft); // Set default alignment
+      receiptData.push(...commands.normalSize); // Set normal text size
+      receiptData.push(...commands.boldOff); // Ensure bold is off initially
+      
       // Header - Company name
       receiptData.push(...commands.alignCenter);
       receiptData.push(...commands.doubleWidth);
@@ -590,61 +593,58 @@ class ThermalPrinterService {
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.crlf);
 
-      // Order details
+      // Order details - Compact format
       receiptData.push(...commands.alignLeft);
       receiptData.push(...commands.bold);
-      receiptData.push(...this.textToBytes(`Order ID: ${orderData.orderId}`));
+      receiptData.push(...this.textToBytes(`${orderData.username}`));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.boldOff);
       
-      receiptData.push(...this.textToBytes(`Employee: ${orderData.username}`));
-      receiptData.push(...commands.crlf);
+      receiptData.push(...this.textToBytes(`${orderData.mealType} | ${orderData.orderDate}`));
       
-      receiptData.push(...this.textToBytes(`Date: ${orderData.orderDate}`));
-      receiptData.push(...commands.crlf);
-      
-      receiptData.push(...this.textToBytes(`Time: ${orderData.orderTime}`));
-      receiptData.push(...commands.crlf);
-      
-      receiptData.push(...this.textToBytes(`Meal Type: ${orderData.mealType}`));
-      receiptData.push(...commands.crlf);
+      // receiptData.push(...commands.crlf);
       receiptData.push(...commands.crlf);
 
       // Separator line
-      receiptData.push(...this.textToBytes('--------------------------------'));
+      receiptData.push(...this.textToBytes('-----------------------------------------------'));
       receiptData.push(...commands.crlf);
 
-      // Order items
+      // Order items - Compact format
       receiptData.push(...commands.bold);
-      receiptData.push(...this.textToBytes('ORDERED ITEMS:'));
+      receiptData.push(...this.textToBytes('ITEMS:'));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.boldOff);
       
       orderData.items.forEach(item => {
-        receiptData.push(...this.textToBytes(`${item.name} x${item.quantity}`));
-        receiptData.push(...commands.crlf);
-        receiptData.push(...this.textToBytes(`  Price: Rs. ${item.price.toFixed(2)}`));
+        // Format item with right-aligned price (47 chars total width for 80mm paper)
+        const itemText = `${item.name} x${item.quantity}`;
+        const priceText = `Rs.${item.price.toFixed(2)}`;
+        const totalWidth = 45; // Adjust for 80mm thermal paper
+        const padding = totalWidth - itemText.length - priceText.length;
+        const spaces = padding > 0 ? ' '.repeat(padding) : ' ';
+        
+        receiptData.push(...this.textToBytes(`${itemText}${spaces}${priceText}`));
         receiptData.push(...commands.crlf);
       });
 
-      // Total
-      receiptData.push(...commands.crlf);
-      receiptData.push(...this.textToBytes('--------------------------------'));
+      // Total - Compact
+      receiptData.push(...this.textToBytes('-----------------------------------------------'));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.bold);
-      receiptData.push(...this.textToBytes(`TOTAL: Rs. ${orderData.totalPrice.toFixed(2)}`));
+      
+      // Right-aligned total
+      const totalText = 'TOTAL:';
+      const totalPriceText = `Rs. ${orderData.totalPrice.toFixed(2)}`;
+      const totalWidth = 45;
+      const totalPadding = totalWidth - totalText.length - totalPriceText.length;
+      const totalSpaces = totalPadding > 0 ? ' '.repeat(totalPadding) : ' ';
+      
+      receiptData.push(...this.textToBytes(`${totalText}${totalSpaces}${totalPriceText}`));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.boldOff);
-      receiptData.push(...commands.crlf);
 
-      // Barcode section
+      // Barcode section - Compact
       receiptData.push(...commands.alignCenter);
-      // receiptData.push(...this.textToBytes('Order Barcode:'));
-      receiptData.push(...commands.crlf);
-
-      // Generate and add barcode - TEST FIRST, THEN ADD TO RECEIPT
-      receiptData.push(...commands.alignCenter);
-      // receiptData.push(...this.textToBytes('Order Barcode:'));
       receiptData.push(...commands.crlf);
 
       console.log('🔧 STEP 1: TESTING BARCODE GENERATION FOR ORDER:', orderData.orderId);
@@ -658,13 +658,7 @@ class ThermalPrinterService {
         console.log('🔧 STEP 2: ADDING TESTED BARCODE TO RECEIPT');
         receiptData.push(...testBarcodeBytes);
         receiptData.push(...commands.crlf);
-        receiptData.push(...commands.crlf);
         console.log('✅ STEP 2 PASSED: BARCODE ADDED TO RECEIPT DATA');
-        
-        // STEP 3: Add verification text
-        // receiptData.push(...this.textToBytes(`Barcode: ${orderData.orderId}`));
-        receiptData.push(...commands.crlf);
-        console.log('✅ STEP 3 PASSED: VERIFICATION TEXT ADDED');
         
       } catch (error) {
         console.error('❌ BARCODE GENERATION OR ADDITION FAILED:', error);
@@ -674,24 +668,24 @@ class ThermalPrinterService {
         receiptData.push(...this.textToBytes(`ORDER: ${orderData.orderId}`));
         receiptData.push(...commands.boldOff);
         receiptData.push(...commands.normalSize);
-        receiptData.push(...commands.crlf);
+        // receiptData.push(...commands.crlf);
         receiptData.push(...this.textToBytes('(Barcode generation failed)'));
-        receiptData.push(...commands.crlf);
+        // receiptData.push(...commands.crlf);
       }
 
-      // Footer
+      // Footer - Compact
+      // receiptData.push(...commands.crlf);
+      receiptData.push(...this.textToBytes('Thank you !'));
       receiptData.push(...commands.crlf);
-      receiptData.push(...this.textToBytes('Thank you for your order!'));
+      receiptData.push(...this.textToBytes('Present this receipt when collecting your meal.'));
       receiptData.push(...commands.crlf);
-      receiptData.push(...this.textToBytes('Please present this receipt'));
-      receiptData.push(...commands.crlf);
-      receiptData.push(...this.textToBytes('when collecting your meal.'));
-      receiptData.push(...commands.crlf);
-      receiptData.push(...commands.crlf);
+      // receiptData.push(...commands.crlf);
+      
+      receiptData.push(...this.textToBytes(`Printed: ${orderData.orderTime}`));
 
-      // Paper feed and cut
+      // Paper feed and cut - Enhanced for proper cutting
       receiptData.push(...commands.paperFeed);
-      receiptData.push(...commands.partialCut);
+      receiptData.push(...commands.cut); // Use full cut for cleaner separation
 
       // Send to printer
       await this.sendData(new Uint8Array(receiptData));
@@ -906,8 +900,10 @@ class OrderReceiptPrinter {
       const commands = this.thermalPrinter.generateESCPOSCommands();
       const testData = [];
 
-      // Initialize printer
-      testData.push(...commands.init);
+      // Initialize printer without paper movement
+      testData.push(...commands.alignLeft);
+      testData.push(...commands.normalSize);
+      testData.push(...commands.boldOff);
       testData.push(...commands.alignCenter);
       
       // Test message
@@ -964,8 +960,10 @@ class OrderReceiptPrinter {
       const commands = this.thermalPrinter.generateESCPOSCommands();
       const testData = [];
 
-      // Initialize printer
-      testData.push(...commands.init);
+      // Initialize printer without paper movement
+      testData.push(...commands.alignLeft);
+      testData.push(...commands.normalSize);
+      testData.push(...commands.boldOff);
 
       // Test header
       testData.push(...commands.alignCenter);
@@ -1022,10 +1020,11 @@ class OrderReceiptPrinter {
       testData.push(...this.thermalPrinter.textToBytes('Test completed successfully!'));
       testData.push(...commands.crlf);
       testData.push(...commands.crlf);
+      testData.push(...commands.crlf);
 
-      // Paper feed and cut
+      // Paper feed and cut - Enhanced for proper cutting
       testData.push(...commands.paperFeed);
-      testData.push(...commands.partialCut);
+      testData.push(...commands.cut);
 
       // Send to printer
       await this.thermalPrinter.sendData(new Uint8Array(testData));
