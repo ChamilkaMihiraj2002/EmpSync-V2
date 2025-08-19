@@ -588,25 +588,18 @@ class ThermalPrinterService {
       receiptData.push(...commands.boldOff);
       receiptData.push(...this.textToBytes('Employee Meal Order'));
       receiptData.push(...commands.crlf);
-      receiptData.push(...commands.crlf);
 
-      // Order details
+      // Order details - Compact format
       receiptData.push(...commands.alignLeft);
       receiptData.push(...commands.bold);
-      receiptData.push(...this.textToBytes(`Order ID: ${orderData.orderId}`));
+      receiptData.push(...this.textToBytes(`${orderData.username}`));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.boldOff);
       
-      receiptData.push(...this.textToBytes(`Employee: ${orderData.username}`));
-      receiptData.push(...commands.crlf);
-      
-      receiptData.push(...this.textToBytes(`Order Date: ${orderData.orderDate}`));
+      receiptData.push(...this.textToBytes(`${orderData.mealType} | ${orderData.orderDate}`));
       receiptData.push(...commands.crlf);
       
       receiptData.push(...this.textToBytes(`Printed: ${orderData.orderTime}`));
-      receiptData.push(...commands.crlf);
-      
-      receiptData.push(...this.textToBytes(`Meal Type: ${orderData.mealType}`));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.crlf);
 
@@ -614,37 +607,27 @@ class ThermalPrinterService {
       receiptData.push(...this.textToBytes('--------------------------------'));
       receiptData.push(...commands.crlf);
 
-      // Order items
+      // Order items - Compact format
       receiptData.push(...commands.bold);
-      receiptData.push(...this.textToBytes('ORDERED ITEMS:'));
+      receiptData.push(...this.textToBytes('ITEMS:'));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.boldOff);
       
       orderData.items.forEach(item => {
-        receiptData.push(...this.textToBytes(`${item.name} x${item.quantity}`));
-        receiptData.push(...commands.crlf);
-        receiptData.push(...this.textToBytes(`  Price: Rs. ${item.price.toFixed(2)}`));
+        receiptData.push(...this.textToBytes(`${item.name} x${item.quantity} - Rs.${item.price.toFixed(2)}`));
         receiptData.push(...commands.crlf);
       });
 
-      // Total
-      receiptData.push(...commands.crlf);
+      // Total - Compact
       receiptData.push(...this.textToBytes('--------------------------------'));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.bold);
       receiptData.push(...this.textToBytes(`TOTAL: Rs. ${orderData.totalPrice.toFixed(2)}`));
       receiptData.push(...commands.crlf);
       receiptData.push(...commands.boldOff);
-      receiptData.push(...commands.crlf);
 
-      // Barcode section
+      // Barcode section - Compact
       receiptData.push(...commands.alignCenter);
-      // receiptData.push(...this.textToBytes('Order Barcode:'));
-      receiptData.push(...commands.crlf);
-
-      // Generate and add barcode - TEST FIRST, THEN ADD TO RECEIPT
-      receiptData.push(...commands.alignCenter);
-      // receiptData.push(...this.textToBytes('Order Barcode:'));
       receiptData.push(...commands.crlf);
 
       console.log('🔧 STEP 1: TESTING BARCODE GENERATION FOR ORDER:', orderData.orderId);
@@ -658,13 +641,7 @@ class ThermalPrinterService {
         console.log('🔧 STEP 2: ADDING TESTED BARCODE TO RECEIPT');
         receiptData.push(...testBarcodeBytes);
         receiptData.push(...commands.crlf);
-        receiptData.push(...commands.crlf);
         console.log('✅ STEP 2 PASSED: BARCODE ADDED TO RECEIPT DATA');
-        
-        // STEP 3: Add verification text
-        // receiptData.push(...this.textToBytes(`Barcode: ${orderData.orderId}`));
-        receiptData.push(...commands.crlf);
-        console.log('✅ STEP 3 PASSED: VERIFICATION TEXT ADDED');
         
       } catch (error) {
         console.error('❌ BARCODE GENERATION OR ADDITION FAILED:', error);
@@ -679,14 +656,11 @@ class ThermalPrinterService {
         receiptData.push(...commands.crlf);
       }
 
-      // Footer
+      // Footer - Compact
       receiptData.push(...commands.crlf);
-      receiptData.push(...this.textToBytes('Thank you for your order!'));
-      receiptData.push(...commands.crlf);
-      receiptData.push(...this.textToBytes('Please present this receipt'));
+      receiptData.push(...this.textToBytes('Thank you! Present this receipt'));
       receiptData.push(...commands.crlf);
       receiptData.push(...this.textToBytes('when collecting your meal.'));
-      receiptData.push(...commands.crlf);
       receiptData.push(...commands.crlf);
 
       // Paper feed and cut
